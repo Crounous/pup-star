@@ -374,7 +374,7 @@ export default function AdminPage() {
           {/* Research List */}
           <div className="space-y-4">
             {paginatedStudies.map((study) => (
-              <div key={study.id} className="bg-white rounded-lg p-6 shadow-md">
+              <div key={study.id} className="rounded-lg p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-[#850d0d] mb-2">{study.title}</h3>
@@ -388,21 +388,21 @@ export default function AdminPage() {
                       <span className="font-semibold">Year:</span> {study.year}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <button
                       onClick={() => handleEdit(study)}
-                      className="px-3 py-1 bg-[#850d0d] text-white rounded hover:bg-[#850d0d]/80 transition-colors"
+                      className="px-3 py-1 text-[#850d0d]"
                     >
-                      Edit
+                     <Edit className="w-6 h-6" />
                     </button>
                     <button
                       onClick={() => {
                         setResearchToDelete(study.id);
                         setDeletionPopupOpen(true);
                       }}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-600/80 transition-colors"
+                      className="px-3 py-1 text-[#850d0d] "
                     >
-                      Delete
+                     <Trash2 className="w-6 h-6" />
                     </button>
                   </div>
                 </div>

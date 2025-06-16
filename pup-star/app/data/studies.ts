@@ -21,34 +21,6 @@ export const studies: StudiesData = {
       "results": "Headline: Achieving High Accuracy and Actionable Visual Explanations\n\nOur experimental results demonstrate that the system achieves high accuracy while providing valuable visual insights through LIME and Grad-CAM.\n\n3.1 Metrics:\n• Accuracy: 92.5%\n• Precision: 91.8%\n• Recall: 93.1%\n• F1-score: 92.3%\n\n3.2 Visual Interpretation Examples:\nBelow are illustrative examples showing how LIME and Grad-CAM provide explanations for the model's predictions.\n\nExample 1: Correctly Classified Case\n• Model Prediction: Correct (Confidence: 95.8%)\n• LIME Output: \"Key features influencing the prediction were subtle characteristics\"\n• Grad-CAM Output: \"Heatmap shows strong activation concentrated precisely on the key areas\"\n\n3.3 Discussion:\nThe integration of explainability techniques provides a critical layer of transparency to the model's predictions. By visually demonstrating which parts of the input are most influential, clinicians can gain confidence in the system's recommendations."
     }
   },
-  "2": {
-    "id": "2",
-    "title": "RESEARCH TITLE 2: SUBTITLE NG RESEARCH",
-    "course": "Information Technology",
-    "year": 2020,
-    "authors": [
-      "Author 1",
-      "Author 2",
-      "Author 3",
-      "Author N"
-    ],
-    "abstract": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
-    "pdfUrl": "/papers/research2.pdf"
-  },
-  "3": {
-    "id": "3",
-    "title": "RESEARCH TITLE 3: SUBTITLE NG RESEARCH",
-    "course": "Computer Science",
-    "year": 2019,
-    "authors": [
-      "Author 1",
-      "Author 2",
-      "Author 3",
-      "Author N"
-    ],
-    "abstract": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
-    "pdfUrl": "/papers/research3.pdf"
-  },
   "4": {
     "id": "4",
     "title": "RESEARCH TITLE 4: SUBTITLE NG RESEARCH",
