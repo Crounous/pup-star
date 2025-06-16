@@ -99,14 +99,14 @@ export function ResearchForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div>
-        <Label htmlFor="title" className="text-[#850d0d] font-medium text-lg mb-2 block">
+        <Label htmlFor="title" className="text-[#850d0d] font-bold text-lg block">
           Title*
         </Label>
         <Input
           id="title"
           value={formData.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
-          className="bg-white border-[#850d0d] border-2 rounded-lg h-12 text-lg focus:ring-2 focus:ring-[#850d0d]"
+          className="bg-transparent border-[#850d0d] border-2 rounded-lg h-12 text-lg"
           required
           disabled={isLoading}
         />
@@ -114,14 +114,14 @@ export function ResearchForm({
 
       {/* Authors */}
       <div>
-        <Label htmlFor="authors" className="text-[#850d0d] font-medium text-lg mb-2 block">
+        <Label htmlFor="authors" className="text-[#850d0d] font-bold text-lg block">
           Author/s*
         </Label>
         <Input
           id="authors"
           value={formData.authors}
           onChange={(e) => handleInputChange('authors', e.target.value)}
-          className="bg-white border-[#850d0d] border-2 rounded-lg h-12 text-lg focus:ring-2 focus:ring-[#850d0d]"
+          className="border-[#850d0d] border-2 rounded-lg h-12 text-lg"
           required
           disabled={isLoading}
         />
@@ -131,7 +131,7 @@ export function ResearchForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Date */}
         <div>
-          <Label htmlFor="date" className="text-[#850d0d] font-medium text-lg mb-2 block">
+          <Label htmlFor="date" className="text-[#850d0d] font-bold text-lg block">
             Date*
           </Label>
           <Input
@@ -139,7 +139,7 @@ export function ResearchForm({
             type="date"
             value={formData.date}
             onChange={(e) => handleInputChange('date', e.target.value)}
-            className="bg-white border-[#850d0d] border-2 rounded-lg h-12 text-lg focus:ring-2 focus:ring-[#850d0d]"
+            className="border-[#850d0d] border-2 rounded-lg h-12 text-lg focus:ring-2 focus:ring-[#850d0d] text-[#850d0d]"
             required
             disabled={isLoading}
           />
@@ -147,16 +147,17 @@ export function ResearchForm({
 
         {/* Course */}
         <div>
-          <Label className="text-[#850d0d] font-medium text-lg mb-2 block">
+          <Label className="text-[#850d0d] font-bold text-lg block">
             Course*
           </Label>
           <RadioGroup
             value={formData.course}
             onValueChange={(value) => handleInputChange('course', value)}
-            className="flex flex-col space-y-2"
+            className="flex flex-col"
             disabled={isLoading}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2" 
+                style={{ marginBottom: '-1rem' }}>
               <RadioGroupItem 
                 value="computer-science" 
                 id="cs" 
@@ -180,7 +181,7 @@ export function ResearchForm({
 
       {/* Thesis PDF Upload */}
       <div>
-        <Label className="text-[#850d0d] font-medium text-lg mb-2 block">
+        <Label className="text-[#850d0d] font-bold text-lg  block">
           Thesis PDF{!isEditMode && '*'}
         </Label>
         <Card className="border-[#850d0d] border-2 bg-white">
@@ -198,7 +199,7 @@ export function ResearchForm({
                 htmlFor="pdf-upload"
                 className={`cursor-pointer flex flex-col items-center space-y-4 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <div className="bg-[#850d0d]/10 p-4 rounded-full">
+                <div className=" p-4 rounded-full">
                   <Upload className="h-8 w-8 text-[#850d0d]" />
                 </div>
                 <div className="text-[#850d0d]">

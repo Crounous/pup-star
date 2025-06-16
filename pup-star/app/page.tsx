@@ -33,9 +33,7 @@ export default function HomePage() {
       {/* Main Container */}
       <div className="flex flex-col items-center justify-center min-h-screen px-4">
         {/* Logo */}
-        <h1 className="text-4xl md:text-6xl font-bold tracking-[0.3em] mb-10 text-[#ffd600] font-montserrat">
-          PUP ST<span className="text-[0.8em] align-top">★</span>R
-        </h1>
+        <img src="../PUPStarLogoYellow.png" alt="PUP STAR" className="w-auto h-auto" />
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="mb-8 w-full flex justify-center">
@@ -51,17 +49,16 @@ export default function HomePage() {
             <Button
               type="submit"
               size="icon"
-              className="bg-[#ffd600] text-[#850d0d] hover:bg-[#fff200] rounded-full w-10 h-10 ml-2.5 transition-colors duration-200"
-            >
-              <ArrowRight className="w-5 h-5" />
+              className="rounded-full"
+            ><img src="../homepage/EnterSearchButton.png" alt="Search" className="w-auto h-auto" />
             </Button>
           </div>
         </form>
 
         {/* All Studies Button */}
         <Link href="/studies">
-          <Button className="bg-[#ffd600] text-[#850d0d] hover:bg-[#fff200] rounded-3xl px-8 py-3 text-xl font-bold transition-colors duration-200">
-            All Studies <Play className="w-4 h-4 ml-2" />
+          <Button className="bg-[#ffd600] text-[#850d0d] hover:bg-[#fff200] rounded-3xl px-8 py-5 text-xl font-bold transition-colors duration-200">
+            All Studies <img src="../homepage/Arrow.png" alt="Arrow Right" className="inline-block w-3 h-3" />
           </Button>
         </Link>
       </div>

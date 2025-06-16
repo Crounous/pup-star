@@ -64,7 +64,7 @@ export default function AdminLoginPopup({
       alert('Passwords do not match');
       return;
     }
-
+                   
     // Handle forgot password logic here
     setIsOpen(false);
     
@@ -108,15 +108,11 @@ export default function AdminLoginPopup({
         
         <div className="bg-[#ffd600] rounded-3xl p-8 w-full">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-2">
-              <h1 className="text-4xl font-bold text-[#850d0d] tracking-wider font-montserrat">
-                PUP ST
-                <Star className="inline-block w-8 h-8 mx-1 fill-[#850d0d] text-[#850d0d]" />
-                R
-              </h1>
+          <div className="text-center mb-2">
+            <div className="flex items-center justify-center mb-0">
+              <img src="../PUPStarLogoRed.png" alt="PUP STAR Logo" className="w-auto h-14" style={{ margin: '-0.5rem' }}/>
             </div>
-            <p className="text-[#850d0d] text-sm font-semibold tracking-wider">
+            <p className="text-[#850d0d] text-md font-semibold tracking-wider">
               ADMIN LOGIN
             </p>
           </div>
@@ -157,13 +153,14 @@ export default function AdminLoginPopup({
               </div>
 
               {/* Login Button */}
+              <div className="flex justify-center">
               <Button
                 type="submit"
-                className="w-full bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-8 transition-colors duration-200"
+                className="w-60 bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-5 text-lg font-bold mt-0 transition-colors duration-200"
               >
                 Login
               </Button>
-
+              </div>
               {/* Forgot Password Link */}
               <div className="text-center mt-4">
                 <button
@@ -178,17 +175,6 @@ export default function AdminLoginPopup({
           ) : (
             /* Forgot Password Form */
             <form onSubmit={handleForgotPassword} className="space-y-6">
-              {/* Back to Login */}
-              <div className="mb-4">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('login')}
-                  className="text-[#850d0d] text-sm hover:underline font-medium"
-                >
-                  ← Back to Login
-                </button>
-              </div>
-
               {/* Security Code */}
               <div className="space-y-2">
                 <Label htmlFor="securityCode" className="text-[#850d0d] font-bold text-base">
@@ -238,12 +224,23 @@ export default function AdminLoginPopup({
               </div>
 
               {/* Reset Password Button */}
+              <div className="flex justify-center">
               <Button
                 type="submit"
-                className="w-full bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-8 transition-colors duration-200"
+                className="w-60 bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-4 transition-colors duration-200"
               >
                 Reset Password
               </Button>
+              </div>
+              <div className="mb-0">
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('login')}
+                  className="text-[#850d0d] text-md hover:underline font-medium mx-auto block"
+                >
+                  Back to Login
+                </button>
+              </div>
             </form>
           )}
         </div>

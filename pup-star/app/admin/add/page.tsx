@@ -51,12 +51,9 @@ export default function AddResearchPage() {
             {/* Header */}
             <div className="mb-8">        
               <div className="text-[#850d0d]">
-                <h1 className="text-xl font-semibold mb-2">
-                  Welcome to the research submission portal.
-                </h1>
-                <p className="text-[#850d0d]">
-                  Kindly upload your research materials using the provided interface.
-                </p>
+                <h1 className="text-xl font-normal mb-2">
+                  <span className="font-bold">Welcome to the research submission portal.</span> Kindly upload your research materials using the provided interface.
+                  </h1>
               </div>
             </div>
 
