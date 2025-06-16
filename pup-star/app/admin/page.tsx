@@ -9,6 +9,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Search, Filter, Menu, Edit, Trash2, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { ResearchDeletionPopup } from '@/components/admin/ResearchDeletionPopup';
 
 // Mock data for research papers
 const mockResearches = [
@@ -70,6 +72,8 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [deletionPopupOpen, setDeletionPopupOpen] = useState(false);
+  const [researchToDelete, setResearchToDelete] = useState<number | null>(null);
 
   const courses = ['Computer Science', 'Information Technology'];
 
@@ -90,43 +94,10 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-[#850d0d] min-h-screen p-6">
-          {/* Logo */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-[#ffd600] tracking-wider">
-              PUP ST
-              <Star className="inline-block w-6 h-6 mx-1 fill-[#ffd600] text-[#ffd600]" />
-              R
-            </h1>
-            <p className="text-[#ffd600] text-sm font-semibold">ADMIN</p>
-          </div>
-
-          {/* Navigation */}
-          <nav className="space-y-4">
-            <div className="flex items-center text-[#ffd600] py-2 px-3 rounded">
-              <span className="mr-3">Researches Uploaded</span>
-              <span className="bg-[#ffd600] text-[#850d0d] rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                8
-              </span>
-            </div>
-            <div className="flex items-center text-[#ffd600] py-2 px-3 rounded">
-              <span className="mr-3">Upload a Research</span>
-              <span className="bg-[#ffd600] text-[#850d0d] rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                +
-              </span>
-            </div>
-            <div
-              className="flex items-center text-[#ffd600] py-2 px-3 rounded cursor-pointer hover:bg-[#ffd600]/10"
-              onClick={() => router.push('/')}
-            >
-              <span className="mr-3">Log Out</span>
-              <span className="bg-[#ffd600] text-[#850d0d] rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                →
-              </span>
-            </div>
-          </nav>
-        </div>
-
+        <AdminSidebar 
+          uploadedCount={mockResearches.length} 
+          onUploadClick={() => router.push('/admin/add')}
+        />
         {/* Main Content */}
         <div className="flex-1 bg-[#ffd600] p-6">
           {/* Header Controls */}
@@ -260,6 +231,10 @@ export default function AdminPage() {
                   <Button
                     size="icon"
                     className="bg-transparent hover:bg-[#850d0d]/10 text-[#850d0d] w-8 h-8"
+                    onClick={() => {
+                      setResearchToDelete(research.id);
+                      setDeletionPopupOpen(true);
+                    }}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -267,6 +242,19 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+
+          <ResearchDeletionPopup
+            open={deletionPopupOpen}
+            onConfirm={() => {
+              // TODO: Add deletion logic here
+              setDeletionPopupOpen(false);
+              setResearchToDelete(null);
+            }}
+            onCancel={() => {
+              setDeletionPopupOpen(false);
+              setResearchToDelete(null);
+            }}
+          />
 
           {/* Pagination */}
           <div className="flex items-center justify-center mt-8 space-x-2">
