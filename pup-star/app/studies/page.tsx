@@ -260,16 +260,23 @@ export default function AllStudiesPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="text-xl font-extrabold text-[#880d0d] mb-0.5 group-hover:text-[#880d0d]/80" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-                        {study.title}: {study.subtitle}
+                        {study.title}
                         <span className="text-base font-semibold text-[#FFD600] ml-2 align-middle">| {study.course}, {study.year}</span>
                       </div>
                       <div className="text-sm text-[#880d0d] font-semibold mb-1" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
                         {study.authors.join(", ")} 
                       </div>
                     </div>
-                    <div className="text-[#880d0d] font-bold text-base min-w-[60px] text-right select-none">
-                      [PDF]
-                    </div>
+                    {study.pdfUrl && (
+                      <a
+                        href={study.pdfUrl}
+                        download
+                        className="text-[#880d0d] font-bold text-base min-w-[60px] text-right select-none hover:text-[#FFD600] transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        [PDF]
+                      </a>
+                    )}
                   </div>
                   <div className="text-[#880d0d] text-base pl-8 mt-1" style={{textIndent: '-2rem', marginLeft: '2rem'}}>
                     {study.abstract}

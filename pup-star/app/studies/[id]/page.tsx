@@ -59,7 +59,18 @@ export default function StudyDetailPage() {
           <main className="flex-1 max-w-4xl">
             {/* Title Section */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-4">{study.title}: {study.subtitle}</h1>
+              <div className="flex justify-between items-start">
+                <h1 className="text-3xl font-bold mb-4">{study.title}</h1>
+                {study.pdfUrl && (
+                  <a
+                    href={study.pdfUrl}
+                    download
+                    className="text-[#880d0d] font-bold text-lg hover:text-[#FFD600] transition-colors"
+                  >
+                    [Download PDF]
+                  </a>
+                )}
+              </div>
               <div className="space-y-2">
                 <div>
                   <strong>Authors:</strong> {study.authors.join(', ')}

@@ -1,7 +1,6 @@
 export interface Study {
   id: string
   title: string
-  subtitle: string
   course: string
   year: number
   authors: string[]

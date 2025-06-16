@@ -3,13 +3,13 @@ import { StudiesData } from '../types/study'
 export const studies: StudiesData = {
   '1': {
     id: '1',
-    title: 'RESEARCH TITLE 1',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'XAVIER: eXplainable AI with LIME and Grad-CAM for Visual Interpretation and Efficient Fungi Skin Disease Recognition using EfficientNet',
     course: 'Computer Science',
     year: 2019,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
     abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
     datePublished: 'June, 2023',
+    pdfUrl: '/papers/xavier.pdf',
     sections: {
       introduction: `Addressing the Challenge of Research in Computer Science
       
@@ -70,65 +70,65 @@ The integration of explainability techniques provides a critical layer of transp
   },
   '2': {
     id: '2',
-    title: 'RESEARCH TITLE 2',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 2: SUBTITLE NG RESEARCH',
     course: 'Information Technology',
     year: 2020,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research2.pdf'
   },
   '3': {
     id: '3',
-    title: 'RESEARCH TITLE 3',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 3: SUBTITLE NG RESEARCH',
     course: 'Computer Science',
     year: 2019,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research3.pdf'
   },
   '4': {
     id: '4',
-    title: 'RESEARCH TITLE 4',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 4: SUBTITLE NG RESEARCH',
     course: 'Information Technology',
     year: 2020,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research4.pdf'
   },
   '5': {
     id: '5',
-    title: 'RESEARCH TITLE 5',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 5: SUBTITLE NG RESEARCH',
     course: 'Computer Science',
     year: 2021,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research5.pdf'
   },
   '6': {
     id: '6',
-    title: 'RESEARCH TITLE 6',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 6: SUBTITLE NG RESEARCH',
     course: 'Information Technology',
     year: 2021,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research6.pdf'
   },
   '7': {
     id: '7',
-    title: 'RESEARCH TITLE 7',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 7: SUBTITLE NG RESEARCH',
     course: 'Computer Science',
     year: 2022,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research7.pdf'
   },
   '8': {
     id: '8',
-    title: 'RESEARCH TITLE 8',
-    subtitle: 'SUBTITLE NG RESEARCH',
+    title: 'RESEARCH TITLE 8: SUBTITLE NG RESEARCH',
     course: 'Information Technology',
     year: 2022,
     authors: ['Author 1', 'Author 2', 'Author 3', 'Author N'],
-    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.'
+    abstract: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.',
+    pdfUrl: '/papers/research8.pdf'
   }
 } 
