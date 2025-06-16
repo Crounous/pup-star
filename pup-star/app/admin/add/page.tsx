@@ -15,14 +15,21 @@ export default function AddResearchPage() {
     setIsLoading(true);
     
     try {
+      // Format the date for display
+      const date = new Date(formData.date);
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      const formattedDate = `${month}, ${year}`;
+
       // Create a new study object
       const newStudy: Study = {
         id: `study-${Object.keys(studies).length + 1}`, // Generate a new ID
         title: formData.title,
         authors: formData.authors.split(',').map(author => author.trim()),
-        year: new Date(formData.date).getFullYear(),
+        year: date.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
         abstract: formData.introduction, // Using introduction as abstract
+        datePublished: formattedDate,
         pdfUrl: file ? `/papers/${file.name}` : undefined,
         sections: {
           introduction: formData.introduction,

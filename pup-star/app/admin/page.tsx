@@ -11,6 +11,8 @@ import { Search, Filter, Menu, Edit, Trash2, ChevronLeft, ChevronRight, Star } f
 import { useRouter } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchDeletionPopup } from '@/components/admin/ResearchDeletionPopup';
+import { EditResearchModal } from '@/app/components/admin/EditResearchModal';
+import { ResearchFormData } from '@/components/admin/ResearchForm';
 import { studies as initialStudies } from '../data/studies';
 import { Study } from '../types/study';
 
@@ -30,6 +32,8 @@ export default function AdminPage() {
   const [researchToDelete, setResearchToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [studies, setStudies] = useState(initialStudies);
+  const [editingStudy, setEditingStudy] = useState<Study | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Initialize tempSelectedCourses when component mounts
   useEffect(() => {
@@ -128,6 +132,73 @@ export default function AdminPage() {
       alert('Failed to delete research. Please try again.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleEdit = (study: Study) => {
+    setEditingStudy(study);
+  };
+
+  const handleUpdate = async (formData: ResearchFormData, file: File | null) => {
+    if (!editingStudy) return;
+    
+    setIsUpdating(true);
+    
+    try {
+      // Format the date for display
+      const date = new Date(formData.date);
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      const formattedDate = `${month}, ${year}`;
+
+      // Create updated study object
+      const updatedStudy: Study = {
+        ...editingStudy,
+        title: formData.title,
+        authors: formData.authors.split(',').map(author => author.trim()),
+        year: date.getFullYear(),
+        course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
+        abstract: formData.introduction,
+        datePublished: formattedDate,
+        pdfUrl: file ? `/papers/${file.name}` : editingStudy.pdfUrl,
+        sections: {
+          introduction: formData.introduction,
+          methodology: formData.methodology,
+          results: formData.resultsAndDiscussion
+        }
+      };
+
+      // Create FormData for the API request
+      const apiFormData = new FormData();
+      apiFormData.append('studyData', JSON.stringify(updatedStudy));
+      if (file) {
+        apiFormData.append('file', file);
+      }
+
+      // Send the request to our API
+      const response = await fetch(`/api/research/${editingStudy.id}`, {
+        method: 'PUT',
+        body: apiFormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update research');
+      }
+
+      // Update the studies state
+      setStudies(prevStudies => ({
+        ...prevStudies,
+        [editingStudy.id]: updatedStudy
+      }));
+
+      // Show success message and close modal
+      alert('Research updated successfully!');
+      setEditingStudy(null);
+    } catch (error) {
+      console.error('Error updating research:', error);
+      alert('Error updating research. Please try again.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -303,35 +374,39 @@ export default function AdminPage() {
           {/* Research List */}
           <div className="space-y-4">
             {paginatedStudies.map((study) => (
-              <div key={study.id} className="grid grid-cols-12 gap-4 py-4 border-b border-[#850d0d]/20">
-                <div className="col-span-8">
-                  <h3 className="text-[#850d0d] font-medium leading-relaxed">
-                    {study.title}
-                  </h3>
+              <div key={study.id} className="bg-white rounded-lg p-6 shadow-md">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-[#850d0d] mb-2">{study.title}</h3>
+                    <p className="text-[#850d0d] mb-1">
+                      <span className="font-semibold">Authors:</span> {study.authors.join(', ')}
+                    </p>
+                    <p className="text-[#850d0d] mb-1">
+                      <span className="font-semibold">Course:</span> {study.course}
+                    </p>
+                    <p className="text-[#850d0d]">
+                      <span className="font-semibold">Year:</span> {study.year}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(study)}
+                      className="px-3 py-1 bg-[#850d0d] text-white rounded hover:bg-[#850d0d]/80 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        setResearchToDelete(study.id);
+                        setDeletionPopupOpen(true);
+                      }}
+                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-600/80 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="col-span-2 flex items-center">
-                  <span className="text-[#850d0d] font-bold text-lg">
-                    {study.year}
-                  </span>
-                </div>
-                <div className="col-span-2 flex items-center justify-end space-x-2">
-                  <Button
-                    size="icon"
-                    className="bg-transparent hover:bg-[#850d0d]/10 text-[#850d0d] w-8 h-8"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    className="bg-transparent hover:bg-[#850d0d]/10 text-[#850d0d] w-8 h-8"
-                    onClick={() => {
-                      setResearchToDelete(study.id);
-                      setDeletionPopupOpen(true);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                <p className="text-[#850d0d]">{study.abstract}</p>
               </div>
             ))}
           </div>
@@ -390,6 +465,16 @@ export default function AdminPage() {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingStudy && (
+        <EditResearchModal
+          study={editingStudy}
+          onClose={() => setEditingStudy(null)}
+          onUpdate={handleUpdate}
+          isLoading={isUpdating}
+        />
+      )}
     </div>
   );
 }

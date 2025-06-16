@@ -118,5 +118,22 @@ export const studies: StudiesData = {
     ],
     "abstract": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
     "pdfUrl": "/papers/research8.pdf"
+  },
+  "study-9": {
+    "id": "study-9",
+    "title": "tito kasi",
+    "authors": [
+      "dasdasdsa"
+    ],
+    "year": 2022,
+    "course": "Computer Science",
+    "abstract": "dasdasdas",
+    "datePublished": "December, 2022",
+    "pdfUrl": "/papers/Sample ANN architecture simulation report (2).pdf",
+    "sections": {
+      "introduction": "dasdasdas",
+      "methodology": "dadasd",
+      "results": "asdasdas"
+    }
   }
 }
