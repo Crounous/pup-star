@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Search, Filter, Menu, Edit, Trash2, ChevronLeft, ChevronRight, Star } f
 import { useRouter } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchDeletionPopup } from '@/components/admin/ResearchDeletionPopup';
-import { studies } from '../data/studies';
+import { studies as initialStudies } from '../data/studies';
 import { Study } from '../types/study';
 
 const ITEMS_PER_PAGE = 4;
@@ -28,9 +28,11 @@ export default function AdminPage() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [deletionPopupOpen, setDeletionPopupOpen] = useState(false);
   const [researchToDelete, setResearchToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [studies, setStudies] = useState(initialStudies);
 
   // Initialize tempSelectedCourses when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     setTempSelectedCourses(selectedCourses);
   }, []);
 
@@ -91,6 +93,42 @@ export default function AdminPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async () => {
+    if (!researchToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/research/${researchToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete research');
+      }
+
+      // Update the studies state by removing the deleted study
+      setStudies(prevStudies => {
+        const newStudies = { ...prevStudies };
+        delete newStudies[researchToDelete];
+        return newStudies;
+      });
+
+      // Close the popup and reset state
+      setDeletionPopupOpen(false);
+      setResearchToDelete(null);
+
+      // Reset to first page if current page becomes empty
+      if (paginatedStudies.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    } catch (error) {
+      console.error('Error deleting research:', error);
+      alert('Failed to delete research. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Generate page numbers for pagination
@@ -300,15 +338,12 @@ export default function AdminPage() {
 
           <ResearchDeletionPopup
             open={deletionPopupOpen}
-            onConfirm={() => {
-              // TODO: Add deletion logic here
-              setDeletionPopupOpen(false);
-              setResearchToDelete(null);
-            }}
+            onConfirm={handleDelete}
             onCancel={() => {
               setDeletionPopupOpen(false);
               setResearchToDelete(null);
             }}
+            isDeleting={isDeleting}
           />
 
           {/* Pagination */}
