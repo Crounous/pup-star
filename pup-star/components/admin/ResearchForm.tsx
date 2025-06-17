@@ -7,11 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, FileText, Trash2, Save } from 'lucide-react';
+import { Upload, FileText, Trash2, Save, PlusCircle, XCircle } from 'lucide-react';
 
 export interface ResearchFormData {
   title: string;
-  authors: string;
+  authors: string[];
   date: string;
   course: string;
   introduction: string;
@@ -30,7 +30,7 @@ export interface ResearchFormProps {
 
 const defaultFormData: ResearchFormData = {
   title: '',
-  authors: '',
+  authors: [''],
   date: '',
   course: '',
   introduction: '',
@@ -56,21 +56,49 @@ export function ResearchForm({
 
   // Update form data when initialData changes (useful for edit mode)
   useEffect(() => {
-    // Only update if we haven't initialized yet and initialData has actual content
-    if (!hasInitialized.current && initialData && Object.keys(initialData).length > 0) {
-      setFormData({
-        ...defaultFormData,
-        ...initialData
-      });
-      hasInitialized.current = true;
-    }
-  }, [initialData.title, initialData.authors, initialData.date, initialData.course, initialData.introduction, initialData.methodology, initialData.resultsAndDiscussion]);
+  // Only update if we haven't initialized yet and initialData has actual content
+  if (!hasInitialized.current && initialData && Object.keys(initialData).length > 0) {
+    setFormData(prev => ({
+      ...prev,
+      ...initialData,
+      // Ensure authors is always an array. If initialData.authors is not provided, fallback to an array with one empty string.
+      authors: initialData.authors && initialData.authors.length > 0 ? initialData.authors : [''],
+    }));
+    hasInitialized.current = true;
+  }
+}, [initialData]);
 
-  const handleInputChange = (field: keyof ResearchFormData, value: string) => {
+const handleInputChange = (field: keyof ResearchFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleAuthorChange = (index: number, value: string) => {
+    const newAuthors = [...formData.authors];
+    newAuthors[index] = value;
+    setFormData(prev => ({
+      ...prev,
+      authors: newAuthors
+    }));
+  };
+
+  const addAuthorField = () => {
+    setFormData(prev => ({
+      ...prev,
+      authors: [...prev.authors, '']
+    }));
+  };
+
+  const removeAuthorField = (index: number) => {
+    if (formData.authors.length > 1) {
+      const newAuthors = formData.authors.filter((_, i) => i !== index);
+      setFormData(prev => ({
+        ...prev,
+        authors: newAuthors
+      }));
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +110,11 @@ export function ResearchForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData, uploadedFile);
+    const submissionData = {
+      ...formData,
+      authors: [formData.authors.join(', ')]
+    };
+    onSubmit(submissionData, uploadedFile);
   };
 
   const handleDelete = () => {
@@ -114,18 +146,49 @@ export function ResearchForm({
 
       {/* Authors */}
       <div>
-        <Label htmlFor="authors" className="text-[#850d0d] font-bold text-lg block">
-          Author/s*
-        </Label>
+  <Label className="text-[#850d0d] font-bold text-lg block mb-2">
+    Author/s*
+  </Label>
+  <div className="flex flex-wrap items-center gap-2">
+    {formData.authors.map((author, index) => (
+      <div key={index} className="relative flex-grow sm:flex-grow-0">
         <Input
-          id="authors"
-          value={formData.authors}
-          onChange={(e) => handleInputChange('authors', e.target.value)}
-          className="border-[#850d0d] border-2 rounded-lg h-12 text-lg"
+          id={`author-${index}`}
+          value={author}
+          onChange={(e) => handleAuthorChange(index, e.target.value)}
+          className="border-[#850d0d] border-2 rounded-lg h-12 text-lg w-65 text-[#850d0d]"
           required
           disabled={isLoading}
         />
+        {/* The remove button is only shown if there is more than one author */}
+        {formData.authors.length > 1 && (
+          <div className="absolute inset-y-0 right-0 flex items-center">
+             <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeAuthorField(index)}
+                className="text-black-400 hover:text-red-700 hover:bg-transparent"
+                disabled={isLoading}
+             >
+                <XCircle className="h-10 w-10" />
+            </Button>
+          </div>
+        )}
       </div>
+    ))}
+    
+    <Button
+      type="button"
+      variant="outline"
+      onClick={addAuthorField}
+      className="text-white border-[#850d0d] rounded-full border-2 bg-[#850d0d] hover:bg-[#621010] hover:text-white"
+      disabled={isLoading}
+    >
+      <PlusCircle className="h-4 w-4" />
+    </Button>
+  </div>
+</div>
 
       {/* Date and Course Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -184,7 +247,7 @@ export function ResearchForm({
         <Label className="text-[#850d0d] font-bold text-lg  block">
           Thesis PDF{!isEditMode && '*'}
         </Label>
-        <Card className="border-[#850d0d] border-2 bg-white">
+        <Card className="border-[#850d0d] border-2 bg-transparent">
           <CardContent className="p-8">
             <div className="text-center">
               <input
@@ -199,12 +262,12 @@ export function ResearchForm({
                 htmlFor="pdf-upload"
                 className={`cursor-pointer flex flex-col items-center space-y-4 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <div className=" p-4 rounded-full">
+                <div className=" p-4 rounded-full bg-[#cc8400]">
                   <Upload className="h-8 w-8 text-[#850d0d]" />
                 </div>
                 <div className="text-[#850d0d]">
                   <p className="font-medium text-lg">
-                    {isEditMode ? 'Upload New PDF (Optional)' : 'Upload a New Research Thesis Paper Here'}
+                    {isEditMode ? 'Upload New PDF (Optional)' : 'Upload Thesis Paper Here'}
                   </p>
                   {uploadedFile && (
                     <p className="text-sm mt-2 flex items-center justify-center gap-2">
@@ -227,14 +290,14 @@ export function ResearchForm({
 
       {/* Introduction */}
       <div>
-        <Label htmlFor="introduction" className="text-[#850d0d] font-medium text-lg mb-2 block">
+        <Label htmlFor="introduction" className="text-[#850d0d] font-bold text-lg block">
           Introduction*
         </Label>
         <Textarea
           id="introduction"
           value={formData.introduction}
           onChange={(e) => handleInputChange('introduction', e.target.value)}
-          className="bg-white border-[#850d0d] border-2 rounded-lg text-lg min-h-[120px] resize-none focus:ring-2 focus:ring-[#850d0d]"
+          className="border-[#850d0d] border-2 rounded-lg text-lg min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
           required
           disabled={isLoading}
         />
@@ -242,30 +305,28 @@ export function ResearchForm({
 
       {/* Methodology */}
       <div>
-        <Label htmlFor="methodology" className="text-[#850d0d] font-medium text-lg mb-2 block">
-          Methodology*
+        <Label htmlFor="methodology" className="text-[#850d0d] font-bold text-lg block">
+          Methodology
         </Label>
         <Textarea
           id="methodology"
           value={formData.methodology}
           onChange={(e) => handleInputChange('methodology', e.target.value)}
-          className="bg-white border-[#850d0d] border-2 rounded-lg text-lg min-h-[120px] resize-none focus:ring-2 focus:ring-[#850d0d]"
-          required
+          className="border-[#850d0d] border-2 rounded-lg text-lg min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
           disabled={isLoading}
         />
       </div>
 
       {/* Results and Discussion */}
       <div>
-        <Label htmlFor="results" className="text-[#850d0d] font-medium text-lg mb-2 block">
-          Results and Discussion*
+        <Label htmlFor="results" className="text-[#850d0d] font-bold text-lg block">
+          Results and Discussion
         </Label>
         <Textarea
           id="results"
           value={formData.resultsAndDiscussion}
           onChange={(e) => handleInputChange('resultsAndDiscussion', e.target.value)}
-          className="bg-white border-[#850d0d] border-2 rounded-lg text-lg min-h-[120px] resize-none focus:ring-2 focus:ring-[#850d0d]"
-          required
+          className="border-[#850d0d] border-2 rounded-lg text-lg min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
           disabled={isLoading}
         />
       </div>
@@ -281,7 +342,7 @@ export function ResearchForm({
             disabled={isLoading}
           >
             <Trash2 className="h-5 w-5 mr-2" />
-            DELETE
+            Delete
           </Button>
         )}
         <Button
@@ -292,12 +353,12 @@ export function ResearchForm({
           {isLoading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#ffd600] border-t-transparent mr-2" />
-              {isEditMode ? 'UPDATING...' : 'UPLOADING...'}
+              {isEditMode ? 'Updating...' : 'Uploading...'}
             </>
           ) : (
             <>
               {isEditMode ? <Save className="h-5 w-5 mr-2" /> : <Upload className="h-5 w-5 mr-2" />}
-              {isEditMode ? 'UPDATE' : 'UPLOAD'}
+              {isEditMode ? 'Update' : 'Upload'}
             </>
           )}
         </Button>

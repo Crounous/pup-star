@@ -25,7 +25,7 @@ export default function AddResearchPage() {
       const newStudy: Study = {
         id: `study-${Object.keys(studies).length + 1}`, // Generate a new ID
         title: formData.title,
-        authors: formData.authors.split(',').map(author => author.trim()),
+        authors: formData.authors.map(author => author.trim()),
         year: date.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
         abstract: formData.introduction, // Using introduction as abstract

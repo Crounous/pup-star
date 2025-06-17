@@ -11,7 +11,7 @@ import { Search, Filter, Menu, Edit, Trash2, ChevronLeft, ChevronRight, Star } f
 import { useRouter } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchDeletionPopup } from '@/components/admin/ResearchDeletionPopup';
-import { EditResearchModal } from '@/app/components/admin/EditResearchModal';
+import { EditResearchModal } from '@/components/admin/EditResearchModal';
 import { ResearchFormData } from '@/components/admin/ResearchForm';
 import { studies as initialStudies } from '../data/studies';
 import { Study } from '../types/study';
@@ -155,7 +155,7 @@ export default function AdminPage() {
       const updatedStudy: Study = {
         ...editingStudy,
         title: formData.title,
-        authors: formData.authors.split(',').map(author => author.trim()),
+        authors: formData.authors.map(author => author.trim()),
         year: date.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
         abstract: formData.introduction,
