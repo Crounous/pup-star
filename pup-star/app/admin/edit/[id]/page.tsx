@@ -1,136 +1,116 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchForm, ResearchFormData } from '@/components/admin/ResearchForm';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { studies } from '@/app/data/studies';
+import { Study } from '@/app/types/study';
 
-export default function EditResearchPage() {
+export default function EditResearchPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const params = useParams();
-  const id = params.id as string;
-  
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [initialData, setInitialData] = useState<ResearchFormData | null>(null);
-  const [existingFileName, setExistingFileName] = useState<string>('');
+  const [study, setStudy] = useState<Study | null>(null);
+  const [isLoadingStudy, setIsLoadingStudy] = useState(true);
 
-  // Memoize the initial data to prevent unnecessary re-renders
-  const memoizedInitialData = useMemo(() => initialData, [initialData]);
-
-  // Fetch existing research data
   useEffect(() => {
-    const fetchResearchData = async () => {
-      try {
-        // TODO: Replace with your actual API call
-        // const response = await fetch(`/api/research/${id}`);
-        // const data = await response.json();
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data - replace with actual API response
-        const mockData = {
-          title: 'Sample Research Title',
-          authors: 'John Doe, Jane Smith',
-          date: '2024-01-15',
-          course: 'computer-science',
-          introduction: 'This is a sample introduction...',
-          methodology: 'This is a sample methodology...',
-          resultsAndDiscussion: 'These are sample results and discussion...',
-        };
-        
-        setInitialData(mockData);
-        setExistingFileName('sample-research.pdf');
-      } catch (error) {
-        console.error('Error fetching research data:', error);
-        // Handle error (show toast, redirect, etc.)
-      } finally {
-        setIsLoadingData(false);
-      }
-    };
-
-    if (id) {
-      fetchResearchData();
+    // Find the study in the studies object
+    const foundStudy = studies[params.id];
+    if (foundStudy) {
+      setStudy(foundStudy);
+    } else {
+      alert('Study not found');
+      router.push('/admin');
     }
-  }, [id]);
+    setIsLoadingStudy(false);
+  }, [params.id, router]);
 
   const handleSubmit = async (formData: ResearchFormData, file: File | null) => {
+    if (!study) return;
+    
     setIsLoading(true);
     
     try {
-      // Handle form submission logic here
-      console.log('Updated form data:', formData);
-      console.log('New uploaded file:', file);
-      
-      // TODO: Add your API call here
-      // const response = await fetch(`/api/research/${id}`, {
-      //   method: 'PUT',
-      //   body: createFormData(formData, file)
-      // });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Redirect back to admin page after successful update
+      // Format the date for display
+      const date = new Date(formData.date);
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      const formattedDate = `${month}, ${year}`;
+
+      // Create updated study object
+      const updatedStudy: Study = {
+        ...study,
+        title: formData.title,
+        authors: formData.authors.split(',').map(author => author.trim()),
+        year: date.getFullYear(),
+        course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
+        abstract: formData.introduction,
+        datePublished: formattedDate,
+        pdfUrl: file ? `/papers/${file.name}` : study.pdfUrl,
+        sections: {
+          introduction: formData.introduction,
+          methodology: formData.methodology,
+          results: formData.resultsAndDiscussion
+        }
+      };
+
+      // Create FormData for the API request
+      const apiFormData = new FormData();
+      apiFormData.append('studyData', JSON.stringify(updatedStudy));
+      if (file) {
+        apiFormData.append('file', file);
+      }
+
+      // Send the request to our API
+      const response = await fetch(`/api/research/${study.id}`, {
+        method: 'PUT',
+        body: apiFormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update research');
+      }
+
+      // Show success message and redirect
+      alert('Research updated successfully!');
       router.push('/admin');
     } catch (error) {
       console.error('Error updating research:', error);
-      // Handle error (show toast, etc.)
+      alert('Error updating research. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    setIsLoading(true);
-    
-    try {
-      // TODO: Add your delete API call here
-      // const response = await fetch(`/api/research/${id}`, {
-      //   method: 'DELETE'
-      // });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirect back to admin page after successful deletion
-      router.push('/admin');
-    } catch (error) {
-      console.error('Error deleting research:', error);
-      // Handle error (show toast, etc.)
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoadingData) {
+  if (isLoadingStudy) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
-        <div className="flex">
-          <AdminSidebar 
-            uploadedCount={8} 
-            onUploadClick={() => router.push('/admin/add')}
-          />
-          <div className="flex-1 bg-[#ffd600] p-8">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#850d0d] border-t-transparent"></div>
-                <span className="ml-4 text-[#850d0d] text-lg">Loading research data...</span>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat flex items-center justify-center">
+        <div className="text-[#850d0d] text-xl">Loading...</div>
       </div>
     );
   }
+
+  if (!study) {
+    return null;
+  }
+
+  // Convert the study data to form data
+  const initialFormData: ResearchFormData = {
+    title: study.title,
+    authors: study.authors.join(', '),
+    date: new Date(study.year, 0, 1).toISOString().split('T')[0], // Convert year to date
+    course: study.course === 'Computer Science' ? 'computer-science' : 'information-technology',
+    introduction: study.sections?.introduction || study.abstract,
+    methodology: study.sections?.methodology || '',
+    resultsAndDiscussion: study.sections?.results || ''
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
       <div className="flex">
         {/* Sidebar */}
         <AdminSidebar 
-          uploadedCount={8} 
+          uploadedCount={Object.keys(studies).length} 
           onUploadClick={() => router.push('/admin/add')}
         />
         
@@ -141,22 +121,20 @@ export default function EditResearchPage() {
             <div className="mb-8">        
               <div className="text-[#850d0d]">
                 <h1 className="text-xl font-semibold mb-2">
-                  Edit Research Paper
+                  Edit Research
                 </h1>
                 <p className="text-[#850d0d]">
-                  Update your research materials using the form below.
+                  Update the research information using the form below.
                 </p>
               </div>
             </div>
 
             {/* Research Form */}
             <ResearchForm
-              initialData={memoizedInitialData || {}}
               onSubmit={handleSubmit}
-              onDelete={handleDelete}
               isEditMode={true}
               isLoading={isLoading}
-              existingFileName={existingFileName}
+              initialData={initialFormData}
             />
           </div>
         </div>

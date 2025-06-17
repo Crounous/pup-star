@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchForm, ResearchFormData } from '@/components/admin/ResearchForm';
 import { useRouter } from 'next/navigation';
+import { studies } from '@/app/data/studies';
+import { Study } from '@/app/types/study';
 
 export default function AddResearchPage() {
   const router = useRouter();
@@ -13,24 +15,52 @@ export default function AddResearchPage() {
     setIsLoading(true);
     
     try {
-      // Handle form submission logic here
-      console.log('Form submitted:', formData);
-      console.log('Uploaded file:', file);
-      
-      // TODO: Add your API call here
-      // const response = await fetch('/api/research', {
-      //   method: 'POST',
-      //   body: createFormData(formData, file)
-      // });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Redirect back to admin page after successful submission
+      // Format the date for display
+      const date = new Date(formData.date);
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      const formattedDate = `${month}, ${year}`;
+
+      // Create a new study object
+      const newStudy: Study = {
+        id: `study-${Object.keys(studies).length + 1}`, // Generate a new ID
+        title: formData.title,
+        authors: formData.authors.split(',').map(author => author.trim()),
+        year: date.getFullYear(),
+        course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
+        abstract: formData.introduction, // Using introduction as abstract
+        datePublished: formattedDate,
+        pdfUrl: file ? `/papers/${file.name}` : undefined,
+        sections: {
+          introduction: formData.introduction,
+          methodology: formData.methodology,
+          results: formData.resultsAndDiscussion
+        }
+      };
+
+      // Create FormData for the API request
+      const apiFormData = new FormData();
+      apiFormData.append('studyData', JSON.stringify(newStudy));
+      if (file) {
+        apiFormData.append('file', file);
+      }
+
+      // Send the request to our API
+      const response = await fetch('/api/research', {
+        method: 'POST',
+        body: apiFormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit research');
+      }
+
+      // Show success message and redirect
+      alert('Research added successfully!');
       router.push('/admin');
     } catch (error) {
       console.error('Error submitting research:', error);
-      // Handle error (show toast, etc.)
+      alert('Error adding research. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -41,7 +71,7 @@ export default function AddResearchPage() {
       <div className="flex">
         {/* Sidebar */}
         <AdminSidebar 
-          uploadedCount={8} 
+          uploadedCount={Object.keys(studies).length} 
           onUploadClick={() => router.push('/admin/add')}
         />
         
