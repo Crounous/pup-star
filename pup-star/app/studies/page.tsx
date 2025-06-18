@@ -146,7 +146,9 @@ export default function AllStudiesPage() {
       {/* Header */}
       <header className="border-b border-[#880d0d]/20 pb-4 pt-6">
         <div className="max-w-7xl mx-auto px-8 flex items-center justify-between gap-8">
-          <img src="/PUPStarLogoRed.png" alt="PUP Star Logo" className="h-15 w-auto" />
+          <Link href="/">
+              <img src="/PUPStarLogoRed.png" alt="PUP Star Logo" className="h-15 w-auto" />
+          </Link>
           
           <form onSubmit={handleSearch} className="flex-1 max-w-xl">
             <div className="flex items-center border-2 border-[#880d0d] rounded-full px-6 h-[56px] bg-white w-full">

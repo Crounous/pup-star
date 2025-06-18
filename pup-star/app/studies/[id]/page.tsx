@@ -25,8 +25,9 @@ export default function StudyDetailPage() {
       {/* Header */}
       <header className="border-b border-[#880d0d]/20 pb-4 pt-6">
         <div className="max-w-7xl mx-auto px-8">
-          <img src="/PUPStarLogoRed.png" alt="PUP Star Logo" className="h-12 mb-2" />
+          <img src="/PUPStarLogoRed.png" alt="PUP Star Logo" className="h-15 w-auto" />
         </div>
+        
       </header>
 
       {/* Back Button */}
