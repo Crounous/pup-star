@@ -6,6 +6,11 @@ import { ChevronLeft } from 'lucide-react'
 import { studies } from '../../data/studies'
 import { Study } from '../../types/study'
 
+const getPdfUrl = (url: string | undefined) => {
+  if (!url) return null;
+  return url.startsWith('http') ? url : url; // Keep full URL for Supabase
+}
+
 export default function StudyDetailPage() {
   const params = useParams()
   const study = studies[params.id as string]

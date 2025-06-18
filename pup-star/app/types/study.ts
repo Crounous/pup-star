@@ -12,6 +12,7 @@ export interface Study {
     methodology: string
     results: string
   }
+  storageMethod?: 'local' | 'supabase';
 }
 
 export interface StudiesData {
