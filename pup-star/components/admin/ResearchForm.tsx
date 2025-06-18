@@ -135,7 +135,7 @@ const handleInputChange = (field: keyof ResearchFormData, value: string) => {
           id="title"
           value={formData.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
-          className="bg-transparent border-[#850d0d] border-2 rounded-lg h-12 text-lg"
+          className="bg-transparent border-[#850d0d] text-[#850d0d] border-2 rounded-lg h-12 text-lg"
           required
           disabled={isLoading}
         />
@@ -294,7 +294,7 @@ const handleInputChange = (field: keyof ResearchFormData, value: string) => {
           id="introduction"
           value={formData.introduction}
           onChange={(e) => handleInputChange('introduction', e.target.value)}
-          className="border-[#850d0d] border-2 rounded-lg text-lg min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
+          className="border-[#850d0d] border-2 rounded-lg text-lg text-[#850d0d] min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
           required
           disabled={isLoading}
         />
@@ -309,7 +309,7 @@ const handleInputChange = (field: keyof ResearchFormData, value: string) => {
           id="methodology"
           value={formData.methodology}
           onChange={(e) => handleInputChange('methodology', e.target.value)}
-          className="border-[#850d0d] border-2 rounded-lg text-lg min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
+          className="border-[#850d0d] border-2 rounded-lg text-lg text-[#850d0d] min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
           disabled={isLoading}
         />
       </div>
@@ -323,7 +323,7 @@ const handleInputChange = (field: keyof ResearchFormData, value: string) => {
           id="results"
           value={formData.resultsAndDiscussion}
           onChange={(e) => handleInputChange('resultsAndDiscussion', e.target.value)}
-          className="border-[#850d0d] border-2 rounded-lg text-lg min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
+          className="border-[#850d0d] border-2 rounded-lg text-lg text-[#850d0d] min-h-[150px] resize-none focus:ring-2 focus:ring-[#850d0d]"
           disabled={isLoading}
         />
       </div>

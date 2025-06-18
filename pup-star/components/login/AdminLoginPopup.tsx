@@ -22,6 +22,11 @@ export default function AdminLoginPopup({
   const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'login' | 'forgot'>('login');
+
+  const [credentials, setCredentials] = useState({
+    username: 'admin',
+    password: 'password123',
+  });
   
   // Login form states
   const [username, setUsername] = useState('');
@@ -37,38 +42,33 @@ export default function AdminLoginPopup({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempted with:', { username, password });
-    
-    // Handle login logic here
-    // For demo purposes, any username/password will work
-    if (username && password) {
+    if (username === credentials.username && password === credentials.password) {
       setIsOpen(false);
-      
-      // Reset form
       setUsername('');
       setPassword('');
-      
-      // Redirect to admin page
       router.push('/admin');
     } else {
-      alert('Please enter both username and password');
+      alert('Invalid username or password');
     }
   };
 
   const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Password reset attempted with:', { securityCode, newPassword, confirmPassword });
     
-    // Validate passwords match
     if (newPassword !== confirmPassword) {
       alert('Passwords do not match');
       return;
     }
+
+    setCredentials(currentCredentials => ({
+      ...currentCredentials,
+      password: newPassword,
+    }));
+  
+    alert('Password has been successfully reset for this session.');
                    
-    // Handle forgot password logic here
     setIsOpen(false);
     
-    // Reset form and view
     setSecurityCode('');
     setNewPassword('');
     setConfirmPassword('');
@@ -183,7 +183,7 @@ export default function AdminLoginPopup({
                 <Input
                   id="securityCode"
                   type="text"
-                  placeholder="User or Name"
+                  placeholder="Enter Security Code"
                   value={securityCode}
                   onChange={(e) => setSecurityCode(e.target.value)}
                   className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
@@ -210,7 +210,7 @@ export default function AdminLoginPopup({
               {/* Confirm New Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-[#850d0d] font-bold text-base">
-                  New Password
+                  Confirm New Password
                 </Label>
                 <Input
                   id="confirmPassword"
