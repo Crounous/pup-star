@@ -3,7 +3,7 @@
 
 This website application is a final project for the requirement of the subject Web Development 
 
-Members : 
+Members: 
 Alano, Ruzel Luigi
 Hinay, Anthony John C.
 Llesis, Earl Gem
