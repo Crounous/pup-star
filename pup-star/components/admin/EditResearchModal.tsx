@@ -14,7 +14,7 @@ export function EditResearchModal({ study, onClose, onUpdate, isLoading }: EditR
   // Convert the study data to form data
   const initialFormData: ResearchFormData = {
     title: study.title,
-    authors: study.authors.join(', '),
+    authors: study.authors,
     date: new Date(study.year, 0, 1).toISOString().split('T')[0], // Convert year to date
     course: study.course === 'Computer Science' ? 'computer-science' : 'information-technology',
     introduction: study.sections?.introduction || study.abstract,

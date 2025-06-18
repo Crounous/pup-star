@@ -109,13 +109,10 @@ const handleInputChange = (field: keyof ResearchFormData, value: string) => {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const submissionData = {
-      ...formData,
-      authors: [formData.authors.join(', ')]
-    };
-    onSubmit(submissionData, uploadedFile);
-  };
+  e.preventDefault();
+  // Keep formData as is, without transforming the authors array
+  onSubmit(formData, uploadedFile);
+};
 
   const handleDelete = () => {
     if (onDelete) {

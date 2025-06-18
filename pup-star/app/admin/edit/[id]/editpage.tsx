@@ -41,7 +41,7 @@ export default function EditResearchPage({ params }: { params: { id: string } })
       const updatedStudy: Study = {
         ...study,
         title: formData.title,
-        authors: formData.authors.split(',').map(author => author.trim()),
+        authors: formData.authors.map(author => author.trim()),
         year: date.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
         abstract: formData.introduction,
@@ -95,9 +95,9 @@ export default function EditResearchPage({ params }: { params: { id: string } })
   }
 
   // Convert the study data to form data
-  const initialFormData: ResearchFormData = {
+  const initialFormData: Partial<ResearchFormData> = {
     title: study.title,
-    authors: study.authors.join(', '),
+    authors: study.authors,
     date: new Date(study.year, 0, 1).toISOString().split('T')[0], // Convert year to date
     course: study.course === 'Computer Science' ? 'computer-science' : 'information-technology',
     introduction: study.sections?.introduction || study.abstract,
