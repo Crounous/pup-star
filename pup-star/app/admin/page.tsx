@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
@@ -11,77 +11,45 @@ import { Search, Filter, Menu, Edit, Trash2, ChevronLeft, ChevronRight, Star } f
 import { useRouter } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchDeletionPopup } from '@/components/admin/ResearchDeletionPopup';
+import { EditResearchModal } from '@/app/components/admin/EditResearchModal';
+import { ResearchFormData } from '@/components/admin/ResearchForm';
+import { studies as initialStudies } from '../data/studies';
+import { Study } from '../types/study';
 
-// Mock data for research papers
-const mockResearches = [
-  {
-    id: 1,
-    title: "XAVIER: eXplainable AI with LIME and Grad-CAM for Visual Interpretation and Efficient Fungi Skin Disease Recognition using EfficientNet",
-    year: "2019",
-    course: "Computer Science"
-  },
-  {
-    id: 2,
-    title: "Mahabang title sa research paper na prof ay si maam she buban usero na mabangis",
-    year: "2019",
-    course: "Information Technology"
-  },
-  {
-    id: 3,
-    title: "Beyond the Itch: CNN-Based Multiclass Classification of Seven Eczema Subtypes Across Diverse Skin Types",
-    year: "2019",
-    course: "Computer Science"
-  },
-  {
-    id: 4,
-    title: "XAVIER: eXplainable AI with LIME and Grad-CAM for Visual Interpretation and Efficient Fungi Skin Disease Recognition using EfficientNet",
-    year: "2019",
-    course: "Information Technology"
-  },
-  {
-    id: 5,
-    title: "XAVIER: eXplainable AI with LIME and Grad-CAM for Visual Interpretation and Efficient Fungi Skin Disease Recognition using EfficientNet",
-    year: "2019",
-    course: "Computer Science"
-  },
-  {
-    id: 6,
-    title: "Mahabang title sa research paper na prof ay si maam she buban usero na mabangis",
-    year: "2019",
-    course: "Information Technology"
-  },
-  {
-    id: 7,
-    title: "Beyond the Itch: CNN-Based Multiclass Classification of Seven Eczema Subtypes Across Diverse Skin Types",
-    year: "2019",
-    course: "Computer Science"
-  },
-  {
-    id: 8,
-    title: "XAVIER: eXplainable AI with LIME and Grad-CAM for Visual Interpretation and Efficient Fungi Skin Disease Recognition using EfficientNet",
-    year: "2019",
-    course: "Information Technology"
-  }
-];
+const ITEMS_PER_PAGE = 4;
 
 export default function AdminPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [tempSelectedCourses, setTempSelectedCourses] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('name');
+  const [tempSortBy, setTempSortBy] = useState(sortBy);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [deletionPopupOpen, setDeletionPopupOpen] = useState(false);
-  const [researchToDelete, setResearchToDelete] = useState<number | null>(null);
+  const [researchToDelete, setResearchToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [studies, setStudies] = useState(initialStudies);
+  const [editingStudy, setEditingStudy] = useState<Study | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Initialize tempSelectedCourses when component mounts
+  useEffect(() => {
+    setTempSelectedCourses(selectedCourses);
+  }, []);
+
+  // Convert studies object to array
+  const allStudies: Study[] = Object.values(studies);
 
   const courses = ['Computer Science', 'Information Technology'];
 
   const handleCourseChange = (course: string, checked: boolean) => {
     if (checked) {
-      setSelectedCourses([...selectedCourses, course]);
+      setTempSelectedCourses([...tempSelectedCourses, course]);
     } else {
-      setSelectedCourses(selectedCourses.filter(c => c !== course));
+      setTempSelectedCourses(tempSelectedCourses.filter(c => c !== course));
     }
   };
 
@@ -90,12 +58,208 @@ export default function AdminPage() {
     console.log('Searching for:', searchQuery);
   };
 
+  const handleFilterApply = () => {
+    setSelectedCourses(tempSelectedCourses);
+    setCurrentPage(1); // Reset to first page when filters change
+    setIsFilterOpen(false);
+  };
+
+  const handleSortApply = () => {
+    setSortBy(tempSortBy);
+    setCurrentPage(1); // Reset to first page when sorting changes
+    setIsSortOpen(false);
+  };
+
+  // Filter studies based on search and course filters
+  const filteredStudies = allStudies.filter(study => {
+    const matchesCourse = selectedCourses.length === 0 || selectedCourses.includes(study.course);
+    const matchesSearch = searchQuery
+      ? study.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        study.abstract.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    return matchesCourse && matchesSearch;
+  });
+
+  // Sort studies
+  const sortedStudies = [...filteredStudies].sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.title.localeCompare(b.title);
+    } else {
+      return b.year - a.year;
+    }
+  });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedStudies.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedStudies = sortedStudies.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async () => {
+    if (!researchToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/research/${researchToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete research');
+      }
+
+      // Update the studies state by removing the deleted study
+      setStudies(prevStudies => {
+        const newStudies = { ...prevStudies };
+        delete newStudies[researchToDelete];
+        return newStudies;
+      });
+
+      // Close the popup and reset state
+      setDeletionPopupOpen(false);
+      setResearchToDelete(null);
+
+      // Reset to first page if current page becomes empty
+      if (paginatedStudies.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    } catch (error) {
+      console.error('Error deleting research:', error);
+      alert('Failed to delete research. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleEdit = (study: Study) => {
+    setEditingStudy(study);
+  };
+
+  const handleUpdate = async (formData: ResearchFormData, file: File | null) => {
+    if (!editingStudy) return;
+    
+    setIsUpdating(true);
+    
+    try {
+      // Format the date for display
+      const date = new Date(formData.date);
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      const formattedDate = `${month}, ${year}`;
+
+      // Create updated study object
+      const updatedStudy: Study = {
+        ...editingStudy,
+        title: formData.title,
+        authors: formData.authors.split(',').map(author => author.trim()),
+        year: date.getFullYear(),
+        course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
+        abstract: formData.introduction,
+        datePublished: formattedDate,
+        pdfUrl: file ? `/papers/${file.name}` : editingStudy.pdfUrl,
+        sections: {
+          introduction: formData.introduction,
+          methodology: formData.methodology,
+          results: formData.resultsAndDiscussion
+        }
+      };
+
+      // Create FormData for the API request
+      const apiFormData = new FormData();
+      apiFormData.append('studyData', JSON.stringify(updatedStudy));
+      if (file) {
+        apiFormData.append('file', file);
+      }
+
+      // Send the request to our API
+      const response = await fetch(`/api/research/${editingStudy.id}`, {
+        method: 'PUT',
+        body: apiFormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update research');
+      }
+
+      // Update the studies state
+      setStudies(prevStudies => ({
+        ...prevStudies,
+        [editingStudy.id]: updatedStudy
+      }));
+
+      // Show success message and close modal
+      alert('Research updated successfully!');
+      setEditingStudy(null);
+    } catch (error) {
+      console.error('Error updating research:', error);
+      alert('Error updating research. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total pages is less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Always show first page
+      pageNumbers.push(1);
+
+      // Calculate start and end of visible pages
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      // Adjust if at the start
+      if (currentPage <= 2) {
+        end = 4;
+      }
+
+      // Adjust if at the end
+      if (currentPage >= totalPages - 1) {
+        start = totalPages - 3;
+      }
+
+      // Add ellipsis if needed
+      if (start > 2) {
+        pageNumbers.push('...');
+      }
+
+      // Add visible page numbers
+      for (let i = start; i <= end; i++) {
+        pageNumbers.push(i);
+      }
+
+      // Add ellipsis if needed
+      if (end < totalPages - 1) {
+        pageNumbers.push('...');
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
       <div className="flex">
         {/* Sidebar */}
         <AdminSidebar 
-          uploadedCount={mockResearches.length} 
+          uploadedCount={allStudies.length} 
           onUploadClick={() => router.push('/admin/add')}
         />
         {/* Main Content */}
@@ -118,7 +282,7 @@ export default function AdminPage() {
                       <div key={course} className="flex items-center space-x-2">
                         <Checkbox
                           id={course}
-                          checked={selectedCourses.includes(course)}
+                          checked={tempSelectedCourses.includes(course)}
                           onCheckedChange={(checked) => handleCourseChange(course, checked as boolean)}
                           className="border-[#850d0d] data-[state=checked]:bg-[#850d0d]"
                         />
@@ -129,7 +293,7 @@ export default function AdminPage() {
                     ))}
                   </div>
                   <Button
-                    onClick={() => setIsFilterOpen(false)}
+                    onClick={handleFilterApply}
                     className="w-full bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] mt-6"
                   >
                     Apply Filter
@@ -147,7 +311,7 @@ export default function AdminPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md bg-[#ffd600] border-2 border-[#850d0d] rounded-xl">
                   <DialogTitle className="text-[#850d0d] font-bold text-lg mb-4">Sort By</DialogTitle>
-                  <RadioGroup value={sortBy} onValueChange={setSortBy}>
+                  <RadioGroup value={tempSortBy} onValueChange={setTempSortBy}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem 
                         value="name" 
@@ -170,7 +334,7 @@ export default function AdminPage() {
                     </div>
                   </RadioGroup>
                   <Button
-                    onClick={() => setIsSortOpen(false)}
+                    onClick={handleSortApply}
                     className="w-full bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] mt-6"
                   >
                     Apply Sort
@@ -209,88 +373,108 @@ export default function AdminPage() {
 
           {/* Research List */}
           <div className="space-y-4">
-            {mockResearches.map((research) => (
-              <div key={research.id} className="grid grid-cols-12 gap-4 py-4 border-b border-[#850d0d]/20">
-                <div className="col-span-8">
-                  <h3 className="text-[#850d0d] font-medium leading-relaxed">
-                    {research.title}
-                  </h3>
+            {paginatedStudies.map((study) => (
+              <div key={study.id} className="rounded-lg p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-[#850d0d] mb-2">{study.title}</h3>
+                    <p className="text-[#850d0d] mb-1">
+                      <span className="font-semibold">Authors:</span> {study.authors.join(', ')}
+                    </p>
+                    <p className="text-[#850d0d] mb-1">
+                      <span className="font-semibold">Course:</span> {study.course}
+                    </p>
+                    <p className="text-[#850d0d]">
+                      <span className="font-semibold">Year:</span> {study.year}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleEdit(study)}
+                      className="px-3 py-1 text-[#850d0d]"
+                    >
+                     <Edit className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setResearchToDelete(study.id);
+                        setDeletionPopupOpen(true);
+                      }}
+                      className="px-3 py-1 text-[#850d0d] "
+                    >
+                     <Trash2 className="w-6 h-6" />
+                    </button>
+                  </div>
                 </div>
-                <div className="col-span-2 flex items-center">
-                  <span className="text-[#850d0d] font-bold text-lg">
-                    {research.year}
-                  </span>
-                </div>
-                <div className="col-span-2 flex items-center justify-end space-x-2">
-                  <Button
-                    size="icon"
-                    className="bg-transparent hover:bg-[#850d0d]/10 text-[#850d0d] w-8 h-8"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    className="bg-transparent hover:bg-[#850d0d]/10 text-[#850d0d] w-8 h-8"
-                    onClick={() => {
-                      setResearchToDelete(research.id);
-                      setDeletionPopupOpen(true);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                <p className="text-[#850d0d]">{study.abstract}</p>
               </div>
             ))}
           </div>
 
           <ResearchDeletionPopup
             open={deletionPopupOpen}
-            onConfirm={() => {
-              // TODO: Add deletion logic here
-              setDeletionPopupOpen(false);
-              setResearchToDelete(null);
-            }}
+            onConfirm={handleDelete}
             onCancel={() => {
               setDeletionPopupOpen(false);
               setResearchToDelete(null);
             }}
+            isDeleting={isDeleting}
           />
 
           {/* Pagination */}
-          <div className="flex items-center justify-center mt-8 space-x-2">
-            <Button
-              variant="ghost"
-              className="text-[#850d0d] hover:bg-[#850d0d]/10"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
-            </Button>
-            <Button className="bg-[#850d0d] text-[#ffd600] w-8 h-8 rounded">
-              1
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-[#850d0d] hover:bg-[#850d0d]/10 w-8 h-8"
-            >
-              2
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-[#850d0d] hover:bg-[#850d0d]/10 w-8 h-8"
-            >
-              3
-            </Button>
-            <span className="text-[#850d0d]">...</span>
-            <Button
-              variant="ghost"
-              className="text-[#850d0d] hover:bg-[#850d0d]/10"
-            >
-              Next
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center mt-8 space-x-2">
+              <Button
+                variant="ghost"
+                className="text-[#850d0d] hover:bg-[#850d0d]/10"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+              
+              {getPageNumbers().map((pageNum, index) => (
+                pageNum === '...' ? (
+                  <span key={`ellipsis-${index}`} className="text-[#850d0d]">...</span>
+                ) : (
+                  <Button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum as number)}
+                    className={`w-8 h-8 rounded ${
+                      currentPage === pageNum
+                        ? 'bg-[#850d0d] text-[#ffd600]'
+                        : 'text-[#850d0d] hover:bg-[#850d0d]/10'
+                    }`}
+                  >
+                    {pageNum}
+                  </Button>
+                )
+              ))}
+
+              <Button
+                variant="ghost"
+                className="text-[#850d0d] hover:bg-[#850d0d]/10"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingStudy && (
+        <EditResearchModal
+          study={editingStudy}
+          onClose={() => setEditingStudy(null)}
+          onUpdate={handleUpdate}
+          isLoading={isUpdating}
+        />
+      )}
     </div>
   );
 }
