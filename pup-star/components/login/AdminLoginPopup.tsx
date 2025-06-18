@@ -22,6 +22,11 @@ export default function AdminLoginPopup({
   const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'login' | 'forgot'>('login');
+
+  const [credentials, setCredentials] = useState({
+    username: 'admin',
+    password: 'password123',
+  });
   
   // Login form states
   const [username, setUsername] = useState('');
@@ -37,33 +42,31 @@ export default function AdminLoginPopup({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempted with:', { username, password });
-    
-    // Handle login logic here
-    // For demo purposes, any username/password will work
-    if (username && password) {
-      setIsOpen(false);
-      
-      // Reset form
-      setUsername('');
-      setPassword('');
-      
-      // Redirect to admin page
-      router.push('/admin');
-    } else {
-      alert('Please enter both username and password');
-    }
+    if (username === credentials.username && password === credentials.password) {
+    setIsOpen(false);
+    setUsername('');
+    setPassword('');
+    router.push('/admin');
+  } else {
+    alert('Invalid username or password');
+  }
   };
 
   const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Password reset attempted with:', { securityCode, newPassword, confirmPassword });
     
-    // Validate passwords match
     if (newPassword !== confirmPassword) {
       alert('Passwords do not match');
       return;
     }
+
+    setCredentials(currentCredentials => ({
+    ...currentCredentials,
+    password: newPassword,
+  }));
+  
+  alert('Password has been successfully reset for this session.');
                    
     // Handle forgot password logic here
     setIsOpen(false);

@@ -38,8 +38,8 @@ export default function StudyDetailPage() {
       <div className="max-w-7xl mx-auto px-8">
         <div className="flex gap-8">
           {/* Navigation Sidebar */}
-          <aside className="w-72 flex-shrink-0 text-right border-r border-[#880d0d]/20 pr-2 pt-6">
-            <nav className="sticky top-6 space-y-2">
+          <aside className="w-72 flex-shrink-0 text-right pr-2 pt-6">
+            <nav className="sticky top-6 border-r-4 border-[#ffd600] space-y-2">
               <Link 
               href="/studies" 
               className="inline-flex font-bold items-center px-4 text-lg text-[#880d0d] hover:text-[#880d0d]/80 transition-colors"
@@ -58,27 +58,29 @@ export default function StudyDetailPage() {
           <main className="flex-1 max-w-4xl">
             {/* Title Section */}
             <div className="mb-8">
-              <div className="flex justify-between items-start">
-                <h1 className="text-3xl font-bold leading-8  mb-4">{study.title}</h1>
+              <div className="items-start">
+                <h1 className="text-3xl font-bold leading-8  mb-1 text-justify">{study.title}</h1>
               </div>
+              <div className="text-right">
               {study.pdfUrl && (
                   <a
                     href={study.pdfUrl}
                     download
-                    className="text-[#880d0d] font-bold text-lg hover:text-[#FFD600] transition-colors"
+                    className="text-[#880d0d]  font-bold text-lg hover:text-[#FFD600] transition-colors"
                   >
                     [Download PDF]
                   </a>
                 )}
-              <div className="space-y-2">
+                </div>
+              <div className="space-y-1 text-black">
                 <div>
-                  <strong>Authors:</strong> {study.authors.join(', ')}
+                  <strong className="text-[#880d0d]">Authors:</strong> {study.authors.join(', ')}
                 </div>
                 <div>
-                  <strong>Date Published:</strong> {study.datePublished}
+                  <strong className="text-[#880d0d]">Date Published:</strong> {study.datePublished}
                 </div>
                 <div>
-                  <strong>Course:</strong> {study.course}
+                  <strong className="text-[#880d0d]">Course:</strong> {study.course}
                 </div>
               </div>
             </div>
@@ -88,21 +90,21 @@ export default function StudyDetailPage() {
               <div className="space-y-12">
                 <section id="introduction">
                   <h2 className="text-2xl font-bold mb-4">INTRODUCTION</h2>
-                  <div className="prose prose-red max-w-none">
+                  <div className="prose prose-red max-w-none text-justify text-black leading-5">
                     {renderParagraphs(study.sections.introduction)}
                   </div>
                 </section>
 
                 <section id="methodology">
                   <h2 className="text-2xl font-bold mb-4">METHODOLOGY</h2>
-                  <div className="prose prose-red max-w-none">
+                  <div className="prose prose-red max-w-none text-justify text-black leading-5">
                     {renderParagraphs(study.sections.methodology)}
                   </div>
                 </section>
 
                 <section id="results">
                   <h2 className="text-2xl font-bold mb-4">RESULTS AND DISCUSSION</h2>
-                  <div className="prose prose-red max-w-none">
+                  <div className="prose prose-red max-w-none text-justify text-black leading-5">
                     {renderParagraphs(study.sections.results)}
                   </div>
                 </section>
