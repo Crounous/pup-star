@@ -270,9 +270,9 @@ export default function AdminPage() {
               {/* Filter Dialog */}
               <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full px-6 py-2">
-                    <Filter className="w-4 h-4 mr-2" />
+                  <Button className="bg-[#850d0d] text-[#ffd600] text-md hover:bg-[#6b0a0a] rounded-full px-6 py-2">
                     Filter
+                    <img src="adminpage/FilterVector.png" alt="Filter Icon" className="w-5 h-5" style={{ marginRight: '-0.5rem' }} />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md bg-[#ffd600] border-2 border-[#850d0d] rounded-xl">
@@ -304,9 +304,9 @@ export default function AdminPage() {
               {/* Sort Dialog */}
               <Dialog open={isSortOpen} onOpenChange={setIsSortOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full px-6 py-2">
-                    <Menu className="w-4 h-4 mr-2" />
+                  <Button className="bg-[#850d0d] text-[#ffd600] text-md hover:bg-[#6b0a0a] rounded-full px-6 py-2">
                     Sort
+                    <img src="adminpage/SortVector.png" alt="Sort Icon" className="w-4 h-4" style={{ marginRight: '-0.2rem' }} />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md bg-[#ffd600] border-2 border-[#850d0d] rounded-xl">
@@ -362,10 +362,10 @@ export default function AdminPage() {
           <div className="bg-[#ffd600] border-b-2 border-[#850d0d] pb-4 mb-4">
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-8">
-                <h2 className="text-[#850d0d] font-bold text-lg">TITLE</h2>
+                <h2 className="text-[#850d0d] font-bold text-xl text-center">TITLE</h2>
               </div>
               <div className="col-span-2">
-                <h2 className="text-[#850d0d] font-bold text-lg">YEAR OF PUBLICATION</h2>
+                <h2 className="text-[#850d0d] font-bold text-xl text-left">YEAR OF PUBLICATION</h2>
               </div>
               <div className="col-span-2"></div>
             </div>
@@ -376,17 +376,8 @@ export default function AdminPage() {
             {paginatedStudies.map((study) => (
               <div key={study.id} className="rounded-lg p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-[#850d0d] mb-2">{study.title}</h3>
-                    <p className="text-[#850d0d] mb-1">
-                      <span className="font-semibold">Authors:</span> {study.authors.join(', ')}
-                    </p>
-                    <p className="text-[#850d0d] mb-1">
-                      <span className="font-semibold">Course:</span> {study.course}
-                    </p>
-                    <p className="text-[#850d0d]">
-                      <span className="font-semibold">Year:</span> {study.year}
-                    </p>
+                  <div className="ml-4">
+                    <h1 className="text-xl font-bold text-[#850d0d] mb-2" style={{ fontSize : '1.5rem' }}>{study.title}</h1>
                   </div>
                   <div className="flex gap-1">
                     <button
@@ -443,8 +434,8 @@ export default function AdminPage() {
                     onClick={() => handlePageChange(pageNum as number)}
                     className={`w-8 h-8 rounded ${
                       currentPage === pageNum
-                        ? 'bg-[#850d0d] text-[#ffd600]'
-                        : 'text-[#850d0d] hover:bg-[#850d0d]/10'
+                        ? 'bg-[#850d0d] text-[#ffd600] hover:bg-[#850d0d] hover:text-[#ffd600]'
+                        : 'text-[#850d0d] bg-transparent shadow-none hover:bg-[#850d0d]/10'
                     }`}
                   >
                     {pageNum}

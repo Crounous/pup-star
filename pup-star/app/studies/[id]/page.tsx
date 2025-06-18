@@ -32,25 +32,25 @@ export default function StudyDetailPage() {
 
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-8 py-6">
-        <Link 
-          href="/studies" 
-          className="inline-flex items-center text-[#880d0d] hover:text-[#880d0d]/80 transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5 mr-1" />
-          Back to Studies
-        </Link>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-8">
         <div className="flex gap-8">
           {/* Navigation Sidebar */}
-          <aside className="w-72 flex-shrink-0">
+          <aside className="w-72 flex-shrink-0 text-right border-r border-[#880d0d]/20 pr-2 pt-6">
             <nav className="sticky top-6 space-y-2">
-              <div className="font-bold text-lg mb-4">Thesis Preview</div>
-              <a href="#introduction" className="block py-1 px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Introduction</a>
-              <a href="#methodology" className="block py-1 px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Methodology</a>
-              <a href="#results" className="block py-1 px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Results and Discussions</a>
+              <Link 
+              href="/studies" 
+              className="inline-flex font-bold items-center px-4 text-lg text-[#880d0d] hover:text-[#880d0d]/80 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1" />
+              Back to Studies
+            </Link>
+              <div className="font-bold px-4 text-md mb-4">Thesis Preview</div>
+              <a href="#introduction" className="block px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Introduction</a>
+              <a href="#methodology" className="block px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Methodology</a>
+              <a href="#results" className="block px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Results and Discussions</a>
             </nav>
           </aside>
 
@@ -59,8 +59,9 @@ export default function StudyDetailPage() {
             {/* Title Section */}
             <div className="mb-8">
               <div className="flex justify-between items-start">
-                <h1 className="text-3xl font-bold mb-4">{study.title}</h1>
-                {study.pdfUrl && (
+                <h1 className="text-3xl font-bold leading-8  mb-4">{study.title}</h1>
+              </div>
+              {study.pdfUrl && (
                   <a
                     href={study.pdfUrl}
                     download
@@ -69,7 +70,6 @@ export default function StudyDetailPage() {
                     [Download PDF]
                   </a>
                 )}
-              </div>
               <div className="space-y-2">
                 <div>
                   <strong>Authors:</strong> {study.authors.join(', ')}

@@ -53,7 +53,7 @@ export default function HomePage() {
       {/* Main Container */}
       <div className="flex flex-col items-center justify-center min-h-screen px-4">
         {/* Logo */}
-        <img src="../PUPStarLogoYellow.png" alt="PUP STAR" className="w-auto h-auto" />
+        <img src="../PUPStarLogoYellow.png" alt="PUP STAR" className="w-auto h-auto mb-8" />
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="mb-8 w-full flex justify-center relative">

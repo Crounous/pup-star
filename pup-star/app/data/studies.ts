@@ -107,22 +107,5 @@ export const studies: StudiesData = {
       "methodology": "dadasd",
       "results": "asdasdas"
     }
-  },
-  "study-8": {
-    "id": "study-8",
-    "title": "asdas",
-    "authors": [
-      "ssa, xxx"
-    ],
-    "year": 2025,
-    "course": "Computer Science",
-    "abstract": "sdds",
-    "datePublished": "June, 2025",
-    "pdfUrl": "/papers/PPL-Notes.pdf",
-    "sections": {
-      "introduction": "sdds",
-      "methodology": "",
-      "results": ""
-    }
   }
 }
