@@ -43,18 +43,17 @@ export default function AdminLoginPopup({
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username === credentials.username && password === credentials.password) {
-    setIsOpen(false);
-    setUsername('');
-    setPassword('');
-    router.push('/admin');
-  } else {
-    alert('Invalid username or password');
-  }
+      setIsOpen(false);
+      setUsername('');
+      setPassword('');
+      router.push('/admin');
+    } else {
+      alert('Invalid username or password');
+    }
   };
 
   const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Password reset attempted with:', { securityCode, newPassword, confirmPassword });
     
     if (newPassword !== confirmPassword) {
       alert('Passwords do not match');
@@ -62,16 +61,14 @@ export default function AdminLoginPopup({
     }
 
     setCredentials(currentCredentials => ({
-    ...currentCredentials,
-    password: newPassword,
-  }));
+      ...currentCredentials,
+      password: newPassword,
+    }));
   
-  alert('Password has been successfully reset for this session.');
+    alert('Password has been successfully reset for this session.');
                    
-    // Handle forgot password logic here
     setIsOpen(false);
     
-    // Reset form and view
     setSecurityCode('');
     setNewPassword('');
     setConfirmPassword('');
@@ -186,7 +183,7 @@ export default function AdminLoginPopup({
                 <Input
                   id="securityCode"
                   type="text"
-                  placeholder="User or Name"
+                  placeholder="Enter Security Code"
                   value={securityCode}
                   onChange={(e) => setSecurityCode(e.target.value)}
                   className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
@@ -213,7 +210,7 @@ export default function AdminLoginPopup({
               {/* Confirm New Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-[#850d0d] font-bold text-base">
-                  New Password
+                  Confirm New Password
                 </Label>
                 <Input
                   id="confirmPassword"
