@@ -22,6 +22,9 @@ export default function AllStudiesPage() {
   })
   const [currentPage, setCurrentPage] = useState(1)
 
+  const currentYear = new Date().getFullYear();
+  // Generate a list of years, for example, from the current year down to 1900
+  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
   // Convert studies object to array
   const allStudies: Study[] = Object.values(studies)
 
@@ -128,15 +131,22 @@ export default function AllStudiesPage() {
 
     return pageNumbers
   }
+  const YearFilter = () => {
+  const [yearFrom, setYearFrom] = useState('');
+  const [yearTo, setYearTo] = useState('');
 
+  // Get the current year
+  const currentYear = new Date().getFullYear();
+  // Generate a list of years, for example, from the current year down to 1900
+  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
+  }
+  
   return (
     <div className="min-h-screen bg-white font-montserrat text-[#880d0d]">
       {/* Header */}
       <header className="border-b border-[#880d0d]/20 pb-4 pt-6">
         <div className="max-w-7xl mx-auto px-8 flex items-center justify-between gap-8">
-          <Link href="/" className="text-5xl font-extrabold tracking-[0.15em] logo select-none flex-shrink-0" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-            PUP ST<span className="inline-block align-top text-4xl mx-1" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>&#9733;</span>R
-          </Link>
+          <img src="/PUPStarLogoRed.png" alt="PUP Star Logo" className="h-15 w-auto" />
           
           <form onSubmit={handleSearch} className="flex-1 max-w-xl">
             <div className="flex items-center border-2 border-[#880d0d] rounded-full px-6 h-[56px] bg-white w-full">
@@ -170,26 +180,38 @@ export default function AllStudiesPage() {
               <div className="mb-2">
                 <label className="block text-sm mb-1" htmlFor="year-from">From:</label>
                 <div className="relative">
-                  <input
+                  <select
                     id="year-from"
-                    type="number"
                     value={yearFrom}
                     onChange={(e) => setYearFrom(e.target.value)}
                     className="w-full border border-[#880d0d] rounded bg-white text-[#880d0d] px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#ffd600] appearance-none"
-                  />
+                  >
+                    <option value="">Any</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#880d0d] pointer-events-none" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm mb-1" htmlFor="year-to">To:</label>
                 <div className="relative">
-                  <input
+                  <select
                     id="year-to"
-                    type="number"
                     value={yearTo}
                     onChange={(e) => setYearTo(e.target.value)}
                     className="w-full border border-[#880d0d] rounded bg-white text-[#880d0d] px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#ffd600] appearance-none"
-                  />
+                  >
+                    <option value="">Any</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#880d0d] pointer-events-none" />
                 </div>
               </div>

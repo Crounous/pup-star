@@ -25,9 +25,7 @@ export default function StudyDetailPage() {
       {/* Header */}
       <header className="border-b border-[#880d0d]/20 pb-4 pt-6">
         <div className="max-w-7xl mx-auto px-8">
-          <Link href="/" className="text-5xl font-extrabold tracking-[0.15em] logo select-none" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-            PUP ST<span className="inline-block align-top text-4xl mx-1" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>&#9733;</span>R
-          </Link>
+          <img src="/PUPStarLogoRed.png" alt="PUP Star Logo" className="h-12 mb-2" />
         </div>
       </header>
 
@@ -46,7 +44,7 @@ export default function StudyDetailPage() {
       <div className="max-w-7xl mx-auto px-8">
         <div className="flex gap-8">
           {/* Navigation Sidebar */}
-          <aside className="w-48 flex-shrink-0">
+          <aside className="w-72 flex-shrink-0">
             <nav className="sticky top-6 space-y-2">
               <div className="font-bold text-lg mb-4">Thesis Preview</div>
               <a href="#introduction" className="block py-1 px-4 rounded hover:bg-[#ffd600]/10 transition-colors">Introduction</a>
