@@ -13,13 +13,17 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchDeletionPopup } from '@/components/admin/ResearchDeletionPopup';
 import { EditResearchModal } from '@/components/admin/EditResearchModal';
 import { ResearchFormData } from '@/components/admin/ResearchForm';
-import { studies as initialStudies } from '../data/studies';
 import { Study } from '../types/study';
+import { supabase } from '@/lib/supabaseClient';
 
 const ITEMS_PER_PAGE = 6;
 
 export default function AdminPage() {
   const router = useRouter();
+  const [studies, setStudies] = useState<Study[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [tempSelectedCourses, setTempSelectedCourses] = useState<string[]>([]);
@@ -31,51 +35,72 @@ export default function AdminPage() {
   const [deletionPopupOpen, setDeletionPopupOpen] = useState(false);
   const [researchToDelete, setResearchToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [studies, setStudies] = useState(initialStudies);
   const [editingStudy, setEditingStudy] = useState<Study | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Initialize tempSelectedCourses when component mounts
   useEffect(() => {
-    setTempSelectedCourses(selectedCourses);
+    const fetchStudies = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch all necessary data from the 'studies' table in your database
+        const { data, error: dbError } = await supabase
+          .from('studies')
+          .select('*'); // Fetches all columns to support filtering, sorting, and editing
+
+        if (dbError) {
+          throw dbError;
+        }
+
+        if (data) {
+          setStudies(data);
+        }
+      } catch (err: any) {
+        console.error("Error fetching studies:", err);
+        setError("Failed to load research data. Please try refreshing the page.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStudies();
   }, []);
 
-  // Convert studies object to array
-  const allStudies: Study[] = Object.values(studies);
+  useEffect(() => {
+    setTempSelectedCourses(selectedCourses);
+  }, []);
 
   const courses = ['Computer Science', 'Information Technology'];
 
   const handleCourseChange = (course: string, checked: boolean) => {
-    if (checked) {
-      setTempSelectedCourses([...tempSelectedCourses, course]);
-    } else {
-      setTempSelectedCourses(tempSelectedCourses.filter(c => c !== course));
-    }
+    setTempSelectedCourses(prev => 
+      checked ? [...prev, course] : prev.filter(c => c !== course)
+    );
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
+    setCurrentPage(1); // Reset to first page on new search
   };
 
   const handleFilterApply = () => {
     setSelectedCourses(tempSelectedCourses);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
     setIsFilterOpen(false);
   };
 
   const handleSortApply = () => {
     setSortBy(tempSortBy);
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
     setIsSortOpen(false);
   };
 
   // Filter studies based on search and course filters
-  const filteredStudies = allStudies.filter(study => {
+  const filteredStudies = studies.filter(study => {
     const matchesCourse = selectedCourses.length === 0 || selectedCourses.includes(study.course);
     const matchesSearch = searchQuery
       ? study.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        study.abstract.toLowerCase().includes(searchQuery.toLowerCase())
+        (study.abstract && study.abstract.toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
     return matchesCourse && matchesSearch;
   });
@@ -85,7 +110,7 @@ export default function AdminPage() {
     if (sortBy === 'name') {
       return a.title.localeCompare(b.title);
     } else {
-      return b.year - a.year;
+      return new Date(b.year, 0).getTime() - new Date(a.year, 0).getTime();
     }
   });
 
@@ -111,19 +136,13 @@ export default function AdminPage() {
       if (!response.ok) {
         throw new Error('Failed to delete research');
       }
+      
+      // Update state by filtering out the deleted study from the array
+      setStudies(prevStudies => prevStudies.filter(study => study.id !== researchToDelete));
 
-      // Update the studies state by removing the deleted study
-      setStudies(prevStudies => {
-        const newStudies = { ...prevStudies };
-        delete newStudies[researchToDelete];
-        return newStudies;
-      });
-
-      // Close the popup and reset state
       setDeletionPopupOpen(false);
       setResearchToDelete(null);
 
-      // Reset to first page if current page becomes empty
       if (paginatedStudies.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       }
@@ -186,12 +205,6 @@ export default function AdminPage() {
       }
 
       // Update the studies state
-      setStudies(prevStudies => ({
-        ...prevStudies,
-        [editingStudy.id]: updatedStudy
-      }));
-
-      // Show success message and close modal
       alert('Research updated successfully!');
       setEditingStudy(null);
     } catch (error) {
@@ -208,58 +221,40 @@ export default function AdminPage() {
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages is less than max visible
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
-      // Always show first page
       pageNumbers.push(1);
-
-      // Calculate start and end of visible pages
       let start = Math.max(2, currentPage - 1);
       let end = Math.min(totalPages - 1, currentPage + 1);
-
-      // Adjust if at the start
-      if (currentPage <= 2) {
-        end = 4;
-      }
-
-      // Adjust if at the end
-      if (currentPage >= totalPages - 1) {
-        start = totalPages - 3;
-      }
-
-      // Add ellipsis if needed
-      if (start > 2) {
-        pageNumbers.push('...');
-      }
-
-      // Add visible page numbers
+      if (currentPage <= 2) end = 4;
+      if (currentPage >= totalPages - 1) start = totalPages - 3;
+      if (start > 2) pageNumbers.push('...');
       for (let i = start; i <= end; i++) {
         pageNumbers.push(i);
       }
-
-      // Add ellipsis if needed
-      if (end < totalPages - 1) {
-        pageNumbers.push('...');
-      }
-
-      // Always show last page
-      if (totalPages > 1) {
-        pageNumbers.push(totalPages);
-      }
+      if (end < totalPages - 1) pageNumbers.push('...');
+      if (totalPages > 1) pageNumbers.push(totalPages);
     }
 
     return pageNumbers;
   };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen bg-[#ffd600] text-[#850d0d] font-bold text-xl">Loading Research Data...</div>;
+  }
+
+  if (error) {
+    return <div className="flex items-center justify-center min-h-screen bg-[#ffd600] text-red-600 font-bold text-xl">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
       <div className="flex">
         {/* Sidebar */}
         <AdminSidebar 
-          uploadedCount={allStudies.length} 
+          uploadedCount={studies.length} 
           onUploadClick={() => router.push('/admin/add')}
         />
         {/* Main Content */}
