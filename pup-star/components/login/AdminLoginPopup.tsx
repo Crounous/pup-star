@@ -173,7 +173,7 @@ export default function AdminLoginPopup({
               <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[70%] -translate-y-1/2 text-[#850d0d] hover:text-[#6b0a0a]"
+              className="absolute right-3 -translate-y-9 text-[#850d0d] hover:text-[#6b0a0a]"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -221,7 +221,7 @@ export default function AdminLoginPopup({
               </div>
 
               {/* New Password */}
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="newPassword" className="text-[#850d0d] font-bold text-base">
                   New Password
                 </Label>
@@ -238,7 +238,7 @@ export default function AdminLoginPopup({
               <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#850d0d] hover:text-[#6b0a0a]"
+              className="absolute right-3 -translate-y-9 text-[#850d0d] hover:text-[#6b0a0a]"
               aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}>
               {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -246,7 +246,7 @@ export default function AdminLoginPopup({
 
 
               {/* Confirm New Password */}
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="confirmPassword" className="text-[#850d0d] font-bold text-base">
                   Confirm New Password
                 </Label>
@@ -263,7 +263,7 @@ export default function AdminLoginPopup({
                 <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#850d0d] hover:text-[#6b0a0a]"
+                className=" absolute right-3 -translate-y-9 text-[#850d0d] hover:text-[#6b0a0a]"
                 aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
