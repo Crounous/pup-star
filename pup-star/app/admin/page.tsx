@@ -160,56 +160,79 @@ export default function AdminPage() {
 
   const handleUpdate = async (formData: ResearchFormData, file: File | null) => {
     if (!editingStudy) return;
-    
-    setIsUpdating(true);
-    
-    try {
-      // Format the date for display
-      const date = new Date(formData.date);
-      const month = date.toLocaleString('default', { month: 'long' });
-      const year = date.getFullYear();
-      const formattedDate = `${month}, ${year}`;
 
-      // Create updated study object
-      const updatedStudy: Study = {
-        ...editingStudy,
+    setIsUpdating(true);
+
+    try {
+      let pdfUrl = editingStudy.pdfUrl; // Keep the old URL by default
+
+      // 1. Handle File Upload to Supabase Storage if a new file is provided
+      if (file) {
+        const filePath = `public/${editingStudy.id}-${file.name}`;
+        
+        // Upload the file, overwriting if it already exists for this study
+        const { error: uploadError } = await supabase.storage
+          .from('research-papers') // IMPORTANT: Replace 'research-papers' with your actual bucket name
+          .upload(filePath, file, {
+            upsert: true, // This will overwrite the file if it already exists
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get the public URL of the newly uploaded file
+        const { data: urlData } = supabase.storage
+          .from('research-papers') // IMPORTANT: Replace 'research-papers' with your actual bucket name
+          .getPublicUrl(filePath);
+
+        if (!urlData) {
+            throw new Error("Could not get public URL for the uploaded file.");
+        }
+        pdfUrl = urlData.publicUrl;
+      }
+
+      // 2. Prepare the data for Supabase update
+      // The keys here should match your Supabase table's column names
+      const updateData = {
         title: formData.title,
         authors: formData.authors.map(author => author.trim()),
-        year: date.getFullYear(),
+        year: new Date(formData.date).getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
         abstract: formData.introduction,
-        datePublished: formattedDate,
-        pdfUrl: file ? `/papers/${file.name}` : editingStudy.pdfUrl,
-        sections: {
-          introduction: formData.introduction,
-          methodology: formData.methodology,
-          results: formData.resultsAndDiscussion
-        }
+        date_published: new Date(formData.date).toISOString(), // Use ISO format for database consistency
+        pdfUrl: pdfUrl,
+        introduction: formData.introduction,
+        methodology: formData.methodology,
+        results_and_discussion: formData.resultsAndDiscussion
       };
 
-      // Create FormData for the API request
-      const apiFormData = new FormData();
-      apiFormData.append('studyData', JSON.stringify(updatedStudy));
-      if (file) {
-        apiFormData.append('file', file);
+      // 3. Update the database record and get the updated row back
+      const { data: updatedStudy, error: updateError } = await supabase
+        .from('studies')
+        .update(updateData)
+        .eq('id', editingStudy.id)
+        .select() // This returns the updated data
+        .single(); // We expect only one row to be updated
+
+      if (updateError) {
+        throw updateError;
+      }
+      
+      if (updatedStudy) {
+        // 4. Update the local state for an immediate UI refresh
+        setStudies(prevStudies =>
+          prevStudies.map(study =>
+            study.id === editingStudy.id ? updatedStudy : study
+          )
+        );
+        alert('Research updated successfully!');
+        setEditingStudy(null); // Close the modal
       }
 
-      // Send the request to our API
-      const response = await fetch(`/api/research/${editingStudy.id}`, {
-        method: 'PUT',
-        body: apiFormData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update research');
-      }
-
-      // Update the studies state
-      alert('Research updated successfully!');
-      setEditingStudy(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating research:', error);
-      alert('Error updating research. Please try again.');
+      alert(`Error updating research: ${error.message || 'Please try again.'}`);
     } finally {
       setIsUpdating(false);
     }

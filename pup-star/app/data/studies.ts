@@ -21,6 +21,31 @@ export const studies: StudiesData = {
       "results": "Headline: Achieving High Accuracy and Actionable Visual Explanations\n\nOur experimental results demonstrate that the system achieves high accuracy while providing valuable visual insights through LIME and Grad-CAM.\n\n3.1 Metrics:\n• Accuracy: 92.5%\n• Precision: 91.8%\n• Recall: 93.1%\n• F1-score: 92.3%\n\n3.2 Visual Interpretation Examples:\nBelow are illustrative examples showing how LIME and Grad-CAM provide explanations for the model's predictions.\n\nExample 1: Correctly Classified Case\n• Model Prediction: Correct (Confidence: 95.8%)\n• LIME Output: \"Key features influencing the prediction were subtle characteristics\"\n• Grad-CAM Output: \"Heatmap shows strong activation concentrated precisely on the key areas\"\n\n3.3 Discussion:\nThe integration of explainability techniques provides a critical layer of transparency to the model's predictions. By visually demonstrating which parts of the input are most influential, clinicians can gain confidence in the system's recommendations."
     }
   },
+  "2": {
+    "id": 2,
+    "created_at": "2025-06-19T20:24:57.505623+00:00",
+    "title": "Enhancing EfficientNet-B0 using a Local-Global Spatially-aware Transformer Layer for improving Diabetic Retinopathy Classification",
+    "authors": [
+      "Ruzel",
+      "Gian",
+      "Kevin",
+      "an"
+    ],
+    "year": 2024,
+    "course": "Computer Science",
+    "abstract": "w",
+    "date_published": "June, 2025",
+    "pdf_url": "https://cjubxvrbvxlrhkbvoycr.supabase.co/storage/v1/object/public/papers/2707a154-58d0-4a9a-8d6c-543827bfcda2-TW1-Group-9%20Paper.pdf",
+    "introduction": "w",
+    "methodology": "",
+    "results_and_discussion": "",
+    "datePublished": "December, 2024",
+    "sections": {
+      "introduction": "w",
+      "methodology": "",
+      "results": "xxczxc"
+    }
+  },
   "4": {
     "id": "4",
     "title": "RESEARCH TITLE 4: SUBTITLE NG RESEARCH",
