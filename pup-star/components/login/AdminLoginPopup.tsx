@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star } from 'lucide-react';
+import { Eye, EyeOff, Star } from 'lucide-react';
 
 interface AdminLoginPopupProps {
   trigger?: React.ReactNode;
@@ -23,6 +23,8 @@ export default function AdminLoginPopup({
   const [internalOpen, setInternalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'login' | 'forgot'>('login');
 
+
+
   const [credentials, setCredentials] = useState({
     username: 'admin',
     password: 'password123',
@@ -32,10 +34,21 @@ export default function AdminLoginPopup({
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
+ // ADD THIS LINE for login password visibility:
+  const [showPassword, setShowPassword] = useState(false); // <--- ADD THIS LINE HERE
+
+
   // Forgot password form states
   const [securityCode, setSecurityCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+ // ADD THESE TWO LINES for forgot password fields visibility:
+  const [showNewPassword, setShowNewPassword] = useState(false); // <--- ADD THIS LINE HERE
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // <--- ADD THIS LINE HERE
+
+
+
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = onOpenChange || setInternalOpen;
@@ -46,6 +59,7 @@ export default function AdminLoginPopup({
       setIsOpen(false);
       setUsername('');
       setPassword('');
+      setShowPassword(false); // Reset password visibility
       router.push('/admin');
     } else {
       alert('Invalid username or password');
@@ -72,6 +86,8 @@ export default function AdminLoginPopup({
     setSecurityCode('');
     setNewPassword('');
     setConfirmPassword('');
+    setShowNewPassword(false); 
+    setShowConfirmPassword(false); 
     setCurrentView('login');
   };
 
@@ -83,9 +99,12 @@ export default function AdminLoginPopup({
       // Reset all form fields
       setUsername('');
       setPassword('');
+      setShowPassword(false); 
       setSecurityCode('');
       setNewPassword('');
       setConfirmPassword('');
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     }
   };
 
@@ -103,8 +122,8 @@ export default function AdminLoginPopup({
       
       <DialogContent className="sm:max-w-md bg-[#ffd600] border-none p-0 rounded-3xl shadow-2xl">
         <DialogTitle className="sr-only">
-          {currentView === 'login' ? 'PUP STAR Admin Login' : 'PUP STAR Password Reset'}
-        </DialogTitle>
+  {currentView === 'login' ? 'PUP STAR Admin Login' : 'PUP STAR Password Reset'}
+</DialogTitle>
         
         <div className="bg-[#ffd600] rounded-3xl p-8 w-full">
           {/* Header */}
@@ -115,7 +134,7 @@ export default function AdminLoginPopup({
             <p className="text-[#850d0d] text-md font-semibold tracking-wider">
               ADMIN LOGIN
             </p>
-          </div>
+          </div> 
 
           {currentView === 'login' ? (
             /* Login Form */
@@ -136,21 +155,31 @@ export default function AdminLoginPopup({
                 />
               </div>
 
-              {/* Password */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#850d0d] font-bold text-base">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
-                  required
-                />
+               {/* Password */}
+              <div className="space-y-2 relative"> {/* ADD 'relative' here */}
+              <Label htmlFor="password" className="text-[#850d0d] font-bold text-base">
+              Password
+              </Label>
+              <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'} 
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium pr-10" 
+              required
+              />
+                              {/*EYE BUTTON */}
+              <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[70%] -translate-y-1/2 text-[#850d0d] hover:text-[#6b0a0a]"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
               </div>
+
 
               {/* Login Button */}
               <div className="flex justify-center">
@@ -205,7 +234,16 @@ export default function AdminLoginPopup({
                   className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
                   required
                 />
+                {/* ADD THIS BUTTON HERE: */}
+              <button
+              type="button"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#850d0d] hover:text-[#6b0a0a]"
+              aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}>
+              {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
               </div>
+
 
               {/* Confirm New Password */}
               <div className="space-y-2">
@@ -221,7 +259,16 @@ export default function AdminLoginPopup({
                   className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
                   required
                 />
-              </div>
+                {/* ADD THIS BUTTON HERE: */}
+                <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#850d0d] hover:text-[#6b0a0a]"
+                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+                </div>
 
               {/* Reset Password Button */}
               <div className="flex justify-center">
