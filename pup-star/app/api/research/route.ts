@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     if (USE_SUPABASE) {
       logInfo('Saving to Supabase database...');
       
-      const insertPromise = supabase!.from('studies').insert([{
+      const insertQuery = supabase!.from('studies').insert([{
         id: studyData.id,
         title: studyData.title,
         course: studyData.course,
@@ -178,9 +178,10 @@ export async function POST(request: NextRequest) {
         pdf_url: studyData.pdfUrl,
         date_published: studyData.datePublished,
         sections: studyData.sections
-      }]).select(); // Add .select() to make it return a Promise
+      }]).select();
 
-      const { error } = await withTimeout(insertPromise, 15000); // 15 second timeout for DB operation
+
+const { error } = await withTimeout(Promise.resolve(insertQuery), 15000);
 
       if (error) {
         logError('Database insert failed', error);

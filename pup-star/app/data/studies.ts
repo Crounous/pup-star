@@ -25,7 +25,7 @@ export const studies: StudiesData = {
     "id": "4",
     "title": "RESEARCH TITLE 4: SUBTITLE NG RESEARCH",
     "course": "Information Technology",
-    "year": 2019,
+    "year": 2018,
     "authors": [
       "Author 2",
       "Author 3",
@@ -33,7 +33,7 @@ export const studies: StudiesData = {
     ],
     "abstract": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
     "pdfUrl": "/papers/research4.pdf",
-    "datePublished": "December, 2019",
+    "datePublished": "December, 2018",
     "sections": {
       "introduction": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
       "methodology": "",
@@ -112,6 +112,23 @@ export const studies: StudiesData = {
       "introduction": "dasdasdas",
       "methodology": "dadasd",
       "results": "asdasdas"
+    }
+  },
+  "study-8": {
+    "id": "study-8",
+    "title": "asddd",
+    "authors": [
+      "qweqw"
+    ],
+    "year": 2025,
+    "course": "Information Technology",
+    "abstract": "dasd",
+    "datePublished": "June, 2025",
+    "pdfUrl": "/papers/Thesis-Proposal-Defense-Revision-Matrix-AY-2023-2024-1.pdf",
+    "sections": {
+      "introduction": "dasd",
+      "methodology": "",
+      "results": ""
     }
   }
 }
