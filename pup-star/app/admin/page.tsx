@@ -16,7 +16,7 @@ import { ResearchFormData } from '@/components/admin/ResearchForm';
 import { studies as initialStudies } from '../data/studies';
 import { Study } from '../types/study';
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 6;
 
 export default function AdminPage() {
   const router = useRouter();
@@ -372,12 +372,13 @@ export default function AdminPage() {
           </div>
 
           {/* Research List */}
-          <div className="space-y-4">
+          <div className="space-y-0">
             {paginatedStudies.map((study) => (
               <div key={study.id} className="rounded-lg p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="ml-4">
-                    <h1 className="text-xl font-bold text-[#850d0d] mb-2" style={{ fontSize : '1.5rem' }}>{study.title}</h1>
+                  <div className="ml-4 flex justify-between items-start w-full">
+                    <h1 className="text-l font-bold text-[#850d0d] mb-2 mr-4 leading-none max-w-200" style={{ fontSize : '1.5rem' }}>{study.title}</h1>
+                    <div className="text-[#850d0d] text-l font-bold mr-60" style={{ fontSize : '1.4rem' }}>{study.year}</div>
                   </div>
                   <div className="flex gap-1">
                     <button
@@ -397,7 +398,6 @@ export default function AdminPage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-[#850d0d]">{study.abstract}</p>
               </div>
             ))}
           </div>
