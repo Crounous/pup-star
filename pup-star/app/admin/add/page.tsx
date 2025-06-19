@@ -31,17 +31,6 @@ export default function AddResearchPage() {
 
   const handleSubmit = async (formData: ResearchFormData, file: File | null) => {
     setIsLoading(true);
-  
-    const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    alert("CRITICAL ERROR: No active session found. The user is not logged in. Please log in again.");
-    console.error("Upload blocked because no session was found.");
-    setIsLoading(false);
-    return; // Stop the function here
-  }
-  
-  console.log("Upload initiated by authenticated user:", session.user);
     
     try {
       let fileUrl: string | undefined = undefined;
