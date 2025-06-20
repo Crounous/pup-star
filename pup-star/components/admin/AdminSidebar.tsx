@@ -10,7 +10,6 @@ const navItems = [
   {
     label: 'Researches Uploaded',
     badge: (uploadedCount: number) => uploadedCount,
-    // Navigates to /admin when clicked
     getOnClick: (_uploadedCount: number, _onUploadClick: (() => void) | undefined, router: any) => () => router.push('/admin'),
   },
   {
@@ -18,7 +17,6 @@ const navItems = [
     badge: (_uploadedCount: number) => (
       <img src="../adminpage/UploadResearchButton.png" alt="PUP STAR" className="w-6 h-auto" />
     ),
-    // Returns onUploadClick if it exists, otherwise undefined (none)
     getOnClick: (_uploadedCount: number, onUploadClick: (() => void) | undefined) => onUploadClick || undefined,
   },
   {
@@ -26,8 +24,11 @@ const navItems = [
     badge: (_uploadedCount: number) => (
       <img src="../adminpage/LogoutButton.png" alt="PUP STAR" className="w-6 h-auto" />
     ),
-    // Returns the logout function directly
-    getOnClick: (_uploadedCount: number, _onUploadClick: (() => void) | undefined, router: any) => () => router.push('/'),
+    // Updated logout function to clear token
+    getOnClick: (_uploadedCount: number, _onUploadClick: (() => void) | undefined, router: any) => () => {
+      localStorage.removeItem('adminToken');  // Clear authentication token
+      router.push('/');  // Redirect to home
+    },
   },
 ];
 

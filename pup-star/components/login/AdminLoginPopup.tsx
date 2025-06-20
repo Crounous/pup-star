@@ -60,6 +60,7 @@ export default function AdminLoginPopup({
     }
 
     if (data.username === username && data.password === password) {
+      localStorage.setItem('adminToken', 'authenticated');
       setIsOpen(false);
       router.push('/admin'); // Redirect on successful login
     } else {

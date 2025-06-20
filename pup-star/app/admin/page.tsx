@@ -15,6 +15,7 @@ import { EditResearchModal } from '@/components/admin/EditResearchModal';
 import { ResearchFormData } from '@/components/admin/ResearchForm';
 import { Study } from '../types/study';
 import { supabase } from '@/lib/supabaseClient';
+import ProtectedRoute from '@/components/login/ProtectedRoute';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -301,6 +302,7 @@ export default function AdminPage() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
       <div className="flex">
         {/* Sidebar */}
@@ -513,5 +515,6 @@ export default function AdminPage() {
         />
       )}
     </div>
+    </ProtectedRoute>
   );
 }
