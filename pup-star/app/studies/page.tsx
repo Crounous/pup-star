@@ -17,7 +17,7 @@ export default function AllStudiesPage() {
   const [sortBy, setSortBy] = useState<'name' | 'date'>('name')
   const [selectedCourses, setSelectedCourses] = useState({
     CS: true,
-    IT: false
+      IT: true
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [studies, setStudies] = useState<Study[]>([])
@@ -351,54 +351,59 @@ export default function AllStudiesPage() {
 
         {/* Studies List */}
         <main className="flex-1 pl-8">
-          {filteredStudies.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-xl font-semibold text-[#880d0d] mb-2">No studies found</p>
-              <p className="text-[#880d0d]/70">Try adjusting your search criteria or filters.</p>
+  {filteredStudies.length === 0 ? (
+    <div className="text-center py-12">
+      <p className="text-xl font-semibold text-[#880d0d] mb-2">No studies found</p>
+      <p className="text-[#880d0d]/70">Try adjusting your search criteria or filters.</p>
+    </div>
+  ) : (
+    <div className="space-y-8">
+      {paginatedStudies.map((study) => (
+        // The key is now on the outer container div
+        <div key={study.id} className="transition-all duration-200 hover:shadow-lg hover:bg-[#ffd600]/5 rounded-lg p-6 relative group">
+          <div className="flex justify-between items-start">
+            <div>
+              {/* This Link now only wraps the title */}
+              <Link href={`/studies/${study.id}`}>
+                <div className="text-xl font-extrabold text-[#880d0d] mb-0.5 group-hover:text-[#880d0d]/80 cursor-pointer" style={{ fontFamily: 'Montserrat, Arial, sans-serif' }}>
+                  {study.title}
+                  <span className="text-base font-semibold text-[#FFD600] ml-2 align-middle">| {study.course}, {study.year}</span>
+                </div>
+              </Link>
+              <div className="text-sm text-[#880d0d] font-semibold mb-1" style={{ fontFamily: 'Montserrat, Arial, sans-serif' }}>
+                {/* Defensive check for authors */}
+                {(study.authors || []).join(", ")}
+              </div>
             </div>
-          ) : (
-            <div className="space-y-8">
-              {paginatedStudies.map((study) => (
-                <Link 
-                  href={`/studies/${study.id}`} 
-                  key={study.id} 
-                  className="block group cursor-pointer"
-                >
-                  <div className="transition-all duration-200 hover:shadow-lg hover:bg-[#ffd600]/5 rounded-lg p-6">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-xl font-extrabold text-[#880d0d] mb-0.5 group-hover:text-[#880d0d]/80" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-                          {study.title}
-                          <span className="text-base font-semibold text-[#FFD600] ml-2 align-middle">| {study.course}, {study.year}</span>
-                        </div>
-                        <div className="text-sm text-[#880d0d] font-semibold mb-1" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-                          {study.authors.join(", ")} 
-                        </div>
-                      </div>
-                      {study.pdfUrl && (
-                        <a
-                          href={study.pdfUrl}
-                          download
-                          className="text-[#880d0d] font-bold text-base min-w-[60px] text-right select-none hover:text-[#FFD600] transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          [PDF]
-                        </a>
-                      )}
-                    </div>
-                    <div className="relative pl-8 mt-1" style={{textIndent: '-2rem', marginLeft: '2rem'}}>
-                      <div className="text-[#880d0d] text-base leading-relaxed">
-                        {renderJustifiedText(truncateAbstract(study.abstract))}
-                      </div>
-                      {study.abstract.length > 300 && (
-                        <div className="absolute bottom-0 right-0 w-16 h-6 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none" />
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              ))}
+            {/* The PDF link is now a sibling, not a child */}
+            {study.pdfUrl && (
+              <a
+                href={study.pdfUrl}
+                download
+                className="text-[#880d0d] font-bold text-base min-w-[60px] text-right select-none hover:text-[#FFD600] transition-colors"
+                // No longer need stopPropagation if the links aren't nested
+              >
+                [PDF]
+              </a>
+            )}
+          </div>
+          <div className="relative pl-8 mt-1" style={{ textIndent: '-2rem', marginLeft: '2rem' }}>
+            <div className="text-[#880d0d] text-base leading-relaxed">
+              {/* You can make the abstract clickable as well */}
+              <Link href={`/studies/${study.id}`}>
+                <div className="cursor-pointer">
+                  {renderJustifiedText(truncateAbstract(study.abstract || ''))}
+                </div>
+              </Link>
             </div>
-          )}
+            {(study.abstract || '').length > 300 && (
+              <div className="absolute bottom-0 right-0 w-16 h-6 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none" />
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
 
           {/* Pagination */}
           {totalPages > 1 && (
