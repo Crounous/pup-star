@@ -126,29 +126,57 @@ export default function AdminPage() {
 
   const handleDelete = async () => {
     if (!researchToDelete) return;
-    
+
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/research/${researchToDelete}`, {
-        method: 'DELETE',
-      });
+      // Step 1: Find the study object to get its file URL
+      const studyToDelete = studies.find(study => study.id === researchToDelete);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete research');
+      // Step 2 (Optional but Recommended): Delete the associated file from Supabase Storage
+      if (studyToDelete && studyToDelete.pdfUrl) {
+        // Extract the file path from the full URL
+        // Example URL: https://<ref>.supabase.co/storage/v1/object/public/research-papers/public/file-name.pdf
+        // The path we need is: "public/file-name.pdf"
+        const bucketName = 'papers'; // IMPORTANT: Use your actual bucket name
+        const urlParts = studyToDelete.pdfUrl.split(`/${bucketName}/`);
+        const filePath = urlParts[1];
+
+        if (filePath) {
+          const { error: storageError } = await supabase.storage
+            .from(bucketName)
+            .remove([filePath]);
+
+          if (storageError) {
+            // Log the error but don't block DB deletion if the file is already gone
+            console.error("Could not delete file from storage:", storageError.message);
+          }
+        }
       }
-      
-      // Update state by filtering out the deleted study from the array
+
+      // Step 3: Delete the record from the 'studies' database table
+      const { error: dbError } = await supabase
+        .from('studies')
+        .delete()
+        .eq('id', researchToDelete);
+
+      if (dbError) {
+        throw dbError; // If this fails, we want to stop and show an error
+      }
+
+      // Step 4: Update the UI state
       setStudies(prevStudies => prevStudies.filter(study => study.id !== researchToDelete));
+      alert('Research deleted successfully!');
 
       setDeletionPopupOpen(false);
       setResearchToDelete(null);
 
+      // Adjust pagination if the last item on a page was deleted
       if (paginatedStudies.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting research:', error);
-      alert('Failed to delete research. Please try again.');
+      alert(`Failed to delete research: ${error.message}`);
     } finally {
       setIsDeleting(false);
     }
@@ -172,7 +200,7 @@ export default function AdminPage() {
         
         // Upload the file, overwriting if it already exists for this study
         const { error: uploadError } = await supabase.storage
-          .from('research-papers') // IMPORTANT: Replace 'research-papers' with your actual bucket name
+          .from('papers') // IMPORTANT: Replace 'research-papers' with your actual bucket name
           .upload(filePath, file, {
             upsert: true, // This will overwrite the file if it already exists
           });
