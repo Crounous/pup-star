@@ -25,15 +25,20 @@ export const studies: StudiesData = {
     "id": "4",
     "title": "RESEARCH TITLE 4: SUBTITLE NG RESEARCH",
     "course": "Information Technology",
-    "year": 2020,
+    "year": 2018,
     "authors": [
-      "Author 1",
       "Author 2",
       "Author 3",
       "Author N"
     ],
     "abstract": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
-    "pdfUrl": "/papers/research4.pdf"
+    "pdfUrl": "/papers/research4.pdf",
+    "datePublished": "December, 2018",
+    "sections": {
+      "introduction": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam dignissim sem lacus, quis pellentesque ex commodo in. Vivamus elementum dui ligula, sit amet rutrum purus condimentum quis.",
+      "methodology": "",
+      "results": ""
+    }
   },
   "5": {
     "id": "5",
@@ -95,17 +100,35 @@ export const studies: StudiesData = {
     "id": "study-9",
     "title": "tito kasi",
     "authors": [
-      "dasdasdsa"
+      "dasdasdsa",
+      "pepe"
     ],
-    "year": 2022,
+    "year": 2021,
     "course": "Computer Science",
     "abstract": "dasdasdas",
-    "datePublished": "December, 2022",
+    "datePublished": "December, 2021",
     "pdfUrl": "/papers/Sample ANN architecture simulation report (2).pdf",
     "sections": {
       "introduction": "dasdasdas",
       "methodology": "dadasd",
       "results": "asdasdas"
+    }
+  },
+  "study-8": {
+    "id": "study-8",
+    "title": "asddd",
+    "authors": [
+      "qweqw"
+    ],
+    "year": 2025,
+    "course": "Information Technology",
+    "abstract": "dasd",
+    "datePublished": "June, 2025",
+    "pdfUrl": "/papers/Thesis-Proposal-Defense-Revision-Matrix-AY-2023-2024-1.pdf",
+    "sections": {
+      "introduction": "dasd",
+      "methodology": "",
+      "results": ""
     }
   }
 }

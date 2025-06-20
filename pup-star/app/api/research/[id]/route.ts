@@ -1,119 +1,186 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { Study } from '@/app/types/study';
+import { supabase } from '@/lib/supabaseClient';
+
+const BUCKET_NAME = 'papers';
+
+function logError(message: string, error?: any) {
+  console.error(`❌ ${message}`);
+  if (error) {
+    console.error('   Details:', error.message || error);
+  }
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: studyId } = await params;
+  
+  try {
+    const { data, error } = await supabase
+      .from('studies')
+      .select('*')
+      .eq('id', studyId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Study not found' },
+          { status: 404 }
+        );
+      }
+      logError('Supabase fetch failed', error);
+      throw error;
+    }
+    
+    // Return raw Supabase data without transformation
+    return NextResponse.json(data);
+    
+  } catch (error: any) {
+    logError(`Error fetching study ID: ${studyId}`, error);
+    return NextResponse.json(
+      { error: 'Failed to fetch study', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+async function uploadPdfToSupabase(file: File, studyId: string): Promise<string> {
+  const fileName = `study-${studyId}-${Date.now()}.pdf`;
+  const arrayBuffer = await file.arrayBuffer();
+  const { data, error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .upload(fileName, arrayBuffer, { contentType: 'application/pdf' });
+
+  if (error) { 
+    throw new Error(`Upload failed: ${error.message}`); 
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from(BUCKET_NAME)
+    .getPublicUrl(data.path);
+
+  return publicUrl;
+}
+
+async function deleteFileFromSupabase(url: string): Promise<void> {
+  const fileName = url.split('/').pop();
+  if (!fileName) return;
+
+  const { error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .remove([fileName]);
+  
+  if (error) {
+    logError('Failed to delete file from storage', error);
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: studyId } = await params;
+  
+  if (!studyId) {
+    return NextResponse.json({ error: 'Study ID is required' }, { status: 400 });
+  }
+
+  try {
+    const formData = await request.formData();
+    const studyDataString = formData.get('studyData') as string | null;
+    const file = formData.get('file') as File | null;
+
+    if (!studyDataString) {
+      return NextResponse.json({ error: 'Missing study data' }, { status: 400 });
+    }
+
+    const frontendData = JSON.parse(studyDataString);
+
+    const updatePayload: { [key: string]: any } = {
+      title: frontendData.title,
+      authors: frontendData.authors,
+      year: frontendData.year,
+      course: frontendData.course,
+      abstract: frontendData.abstract,
+      sections: frontendData.sections,
+      date_published: frontendData.datePublished,
+    };
+    
+    if (file) {
+      const newPdfUrl = await uploadPdfToSupabase(file, studyId);
+      updatePayload.pdf_url = newPdfUrl;
+      
+      if (frontendData.pdfUrl) {
+        await deleteFileFromSupabase(frontendData.pdfUrl);
+      }
+    } else {
+      updatePayload.pdf_url = frontendData.pdfUrl || frontendData.pdf_url;
+    }
+
+    const { data, error } = await supabase
+      .from('studies')
+      .update(updatePayload)
+      .eq('id', studyId)
+      .select()
+      .single();
+
+    if (error) {
+      logError('Supabase update failed', error);
+      throw error;
+    }
+
+    return NextResponse.json(data);
+    
+  } catch (error: any) {
+    logError(`Error updating study ID: ${studyId}`, error);
+    return NextResponse.json(
+      { error: 'Failed to update study', details: error.message },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: studyId } = await params;
+  
   try {
-    const studyId = params.id;
-    const studiesPath = path.join(process.cwd(), 'app', 'data', 'studies.ts');
-    
-    // Read the current studies file
-    const studiesContent = fs.readFileSync(studiesPath, 'utf8');
-    
-    // Extract the studies object content
-    const studiesMatch = studiesContent.match(/export const studies: StudiesData = ({[\s\S]*})/);
-    if (!studiesMatch) {
-      throw new Error('Invalid studies file format');
-    }
+    const { data: study, error: fetchError } = await supabase
+      .from('studies')
+      .select('pdf_url, title')
+      .eq('id', studyId)
+      .single();
 
-    // Parse the studies object
-    const studiesStr = studiesMatch[1];
-    const studiesObj = eval(`(${studiesStr})`);
-
-    // Delete the study
-    if (!studiesObj[studyId]) {
+    if (fetchError) {
+      logError('Error fetching study for deletion', fetchError);
       return NextResponse.json({ error: 'Study not found' }, { status: 404 });
     }
 
-    // Get the PDF URL before deleting
-    const pdfUrl = studiesObj[studyId].pdfUrl;
+    if (study?.pdf_url) {
+      await deleteFileFromSupabase(study.pdf_url);
+    }
 
-    // Delete the study from the object
-    delete studiesObj[studyId];
+    const { error } = await supabase
+      .from('studies')
+      .delete()
+      .eq('id', studyId);
 
-    // Create the new file content
-    const newContent = `import { StudiesData } from '../types/study'
-
-export const studies: StudiesData = ${JSON.stringify(studiesObj, null, 2)}`;
-
-    // Write the updated content back to studies.ts
-    fs.writeFileSync(studiesPath, newContent);
-
-    // Delete the PDF file if it exists
-    if (pdfUrl) {
-      const pdfPath = path.join(process.cwd(), 'public', pdfUrl);
-      if (fs.existsSync(pdfPath)) {
-        fs.unlinkSync(pdfPath);
-      }
+    if (error) {
+      logError('Supabase delete error', error);
+      throw error;
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting study:', error);
+    
+  } catch (error: any) {
+    logError('Error deleting study', error);
     return NextResponse.json(
       { error: 'Failed to delete study' },
       { status: 500 }
     );
   }
 }
-
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const formData = await request.formData();
-    const studyData = JSON.parse(formData.get('studyData') as string) as Study;
-    const file = formData.get('file') as File | null;
-
-    // Read the current studies.ts file
-    const studiesPath = path.join(process.cwd(), 'app', 'data', 'studies.ts');
-    const studiesContent = fs.readFileSync(studiesPath, 'utf-8');
-
-    // Extract the studies object content
-    const studiesMatch = studiesContent.match(/export const studies: StudiesData = ({[\s\S]*})/);
-    if (!studiesMatch) {
-      throw new Error('Could not find studies object in file');
-    }
-
-    // Parse the studies object
-    const studiesStr = studiesMatch[1];
-    const studies = eval(`(${studiesStr})`);
-
-    // Update the study
-    studies[params.id] = studyData;
-
-    // Handle file upload if a new file is provided
-    if (file) {
-      const papersDir = path.join(process.cwd(), 'public', 'papers');
-      if (!fs.existsSync(papersDir)) {
-        fs.mkdirSync(papersDir, { recursive: true });
-      }
-
-      const filePath = path.join(papersDir, file.name);
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      fs.writeFileSync(filePath, buffer);
-    }
-
-    // Create the new file content
-    const newContent = `import { StudiesData } from '../types/study'
-
-export const studies: StudiesData = ${JSON.stringify(studies, null, 2)}`;
-
-    // Write the updated content back to studies.ts
-    fs.writeFileSync(studiesPath, newContent);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error updating research:', error);
-    return NextResponse.json(
-      { error: 'Failed to update research' },
-      { status: 500 }
-    );
-  }
-} 

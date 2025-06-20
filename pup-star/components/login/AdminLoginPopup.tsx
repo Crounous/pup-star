@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react'; 
+import { supabase } from '@/lib/supabaseClient';
 
 interface AdminLoginPopupProps {
   trigger?: React.ReactNode;
@@ -14,78 +15,132 @@ interface AdminLoginPopupProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export default function AdminLoginPopup({ 
-  trigger, 
-  isOpen: controlledOpen, 
-  onOpenChange 
+export default function AdminLoginPopup({
+  trigger,
+  isOpen: controlledOpen,
+  onOpenChange
 }: AdminLoginPopupProps) {
   const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'login' | 'forgot'>('login');
-  
-  // Login form states
+  const [currentView, setCurrentView] = useState<'login' | 'forgot_passcode' | 'forgot_reset'>('login');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // --- State for both forms ---
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Forgot password form states
-  const [securityCode, setSecurityCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // --- Additional states for Forgot Password form ---
+  const [passcode, setPasscode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = onOpenChange || setInternalOpen;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempted with:', { username, password });
-    
-    // Handle login logic here
-    // For demo purposes, any username/password will work
-    if (username && password) {
-      setIsOpen(false);
-      
-      // Reset form
-      setUsername('');
-      setPassword('');
-      
-      // Redirect to admin page
-      router.push('/admin');
-    } else {
-      alert('Please enter both username and password');
-    }
-  };
+    setIsLoading(true);
+    setError(null);
 
-  const handleForgotPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Password reset attempted with:', { securityCode, newPassword, confirmPassword });
-    
-    // Validate passwords match
-    if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
+    const { data, error: fetchError } = await supabase
+      .from('adminaccount')
+      .select('username, password')
+      .limit(1)
+      .single();
+
+    if (fetchError || !data) {
+      setError('Could not verify credentials. Try again.');
+      setIsLoading(false);
       return;
     }
 
-    // Handle forgot password logic here
-    setIsOpen(false);
+    if (data.username === username && data.password === password) {
+      setIsOpen(false);
+      router.push('/admin'); // Redirect on successful login
+    } else {
+      setError('Invalid username or password.');
+    }
     
-    // Reset form and view
-    setSecurityCode('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setCurrentView('login');
+    setIsLoading(false);
   };
 
+  const handlePasscodeCheck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+  const { data, error: fetchError } = await supabase
+      .from('adminaccount')
+      .select('passcode')
+      .limit(1)
+      .single();
+
+  if (fetchError || !data) {
+        setError('Could not verify passcode. Please contact an administrator.');
+        setIsLoading(false);
+        return;
+    }
+
+    if (data.passcode === passcode) {
+        setCurrentView('forgot_reset'); // Move to the next step
+    } else {
+        setError('Incorrect passcode.');
+    }
+
+    setIsLoading(false);
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match.');
+      setIsLoading(false);
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('Password should be at least 6 characters.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Update the password for the single account (assuming id = 1 or another fixed value).
+    // Ensure you know the primary key of your single-row table.
+    const { error: updateError } = await supabase
+        .from('adminaccount')
+        .update({ password: newPassword })
+        .eq('id', 1); // IMPORTANT: Update based on your table's primary key for the single entry.
+
+    if (updateError) {
+        setError('Failed to update password. Please try again.');
+    } else {
+        setMessage('Password updated successfully. Please log in.');
+        setCurrentView('login'); // Return to login view
+    }
+
+    setIsLoading(false);
+  };
   const handleDialogClose = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      // Reset to login view when dialog closes
       setCurrentView('login');
-      // Reset all form fields
       setUsername('');
       setPassword('');
-      setSecurityCode('');
+      setPasscode('');
       setNewPassword('');
       setConfirmPassword('');
+      setShowPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+      setError(null);
+      setMessage(null);
     }
   };
 
@@ -94,6 +149,168 @@ export default function AdminLoginPopup({
       Staff Login
     </Button>
   );
+
+  const renderContent = () => {
+    switch(currentView) {
+        // --- Forgot Password: Enter Passcode View ---
+        case 'forgot_passcode':
+            return (
+                <form onSubmit={handlePasscodeCheck} className="space-y-6">
+                    <p className="text-center text-[#850d0d] font-semibold">Enter the security passcode to reset your password.</p>
+                    <div className="space-y-2">
+                        <Label htmlFor="passcode" className="text-[#850d0d] font-bold text-base">
+                            Passcode
+                        </Label>
+                        <Input
+                          id="passcode"
+                          type="password"
+                          placeholder="Enter passcode"
+                          value={passcode}
+                          onChange={(e) => setPasscode(e.target.value)}
+                          className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
+                          required
+                        />
+                    </div>
+                    <div className="flex justify-center">
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-60 bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-4 transition-colors duration-200"
+                        >
+                          {isLoading ? 'Verifying...' : 'Verify Passcode'}
+                        </Button>
+                    </div>
+                    <div className="mb-0">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentView('login')}
+                          className="text-[#850d0d] text-md hover:underline font-medium mx-auto block"
+                        >
+                          Back to Login
+                        </button>
+                    </div>
+                </form>
+            );
+        // --- Forgot Password: Reset Password View ---
+        case 'forgot_reset':
+            return (
+                <form onSubmit={handlePasswordUpdate} className="space-y-6">
+                    <p className="text-center text-[#850d0d] font-semibold">Enter your new password.</p>
+                     {/* New Password Input */}
+                    <div className="space-y-2 relative">
+                        <Label htmlFor="new-password" className="text-[#850d0d] font-bold text-base">
+                            New Password
+                        </Label>
+                        <Input
+                          id="new-password"
+                          type={showNewPassword ? 'text' : 'password'}
+                          placeholder="Enter new password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium pr-10"
+                          required
+                        />
+                        <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 -translate-y-9 text-[#850d0d] hover:text-[#6b0a0a]">
+                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
+                    {/* Confirm Password Input */}
+                    <div className="space-y-2 relative">
+                        <Label htmlFor="confirm-password" className="text-[#850d0d] font-bold text-base">
+                            Confirm New Password
+                        </Label>
+                        <Input
+                          id="confirm-password"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          placeholder="Confirm new password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium pr-10"
+                          required
+                        />
+                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 -translate-y-9 text-[#850d0d] hover:text-[#6b0a0a]">
+                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
+                    <div className="flex justify-center">
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-60 bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-4 transition-colors duration-200"
+                        >
+                          {isLoading ? 'Updating...' : 'Update Password'}
+                        </Button>
+                    </div>
+                </form>
+            );
+        // --- Login View ---
+        case 'login':
+        default:
+            return (
+                <form onSubmit={handleLogin} className="space-y-6">
+                    {/* Username Input */}
+                    <div className="space-y-2">
+                        <Label htmlFor="username-login" className="text-[#850d0d] font-bold text-base">
+                            Username
+                        </Label>
+                        <Input
+                          id="username-login"
+                          type="text"
+                          placeholder="Enter your username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
+                          required
+                        />
+                    </div>
+
+                    {/* Password Input */}
+                    <div className="space-y-2 relative">
+                        <Label htmlFor="password-login" className="text-[#850d0d] font-bold text-base">
+                            Password
+                        </Label>
+                        <Input
+                          id="password-login"
+                          type={showPassword ? 'text' : 'password'} 
+                          placeholder="Password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium pr-10" 
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 -translate-y-9 text-[#850d0d] hover:text-[#6b0a0a]"
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <Button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-60 bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-5 text-lg font-bold mt-0 transition-colors duration-200"
+                        >
+                          {isLoading ? 'Logging In...' : 'Login'}
+                        </Button>
+                    </div>
+
+                    <div className="text-center mt-4">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentView('forgot_passcode')}
+                          className="text-[#850d0d] text-sm hover:underline font-medium"
+                        >
+                          Forgot Password?
+                        </button>
+                    </div>
+                </form>
+            );
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
@@ -107,145 +324,19 @@ export default function AdminLoginPopup({
         </DialogTitle>
         
         <div className="bg-[#ffd600] rounded-3xl p-8 w-full">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-2">
-              <h1 className="text-4xl font-bold text-[#850d0d] tracking-wider font-montserrat">
-                PUP ST
-                <Star className="inline-block w-8 h-8 mx-1 fill-[#850d0d] text-[#850d0d]" />
-                R
-              </h1>
+          <div className="text-center mb-2">
+            <div className="flex items-center justify-center mb-0">
+              <img src="../PUPStarLogoRed.png" alt="PUP STAR Logo" className="w-auto h-14" style={{ margin: '-0.5rem' }}/>
             </div>
-            <p className="text-[#850d0d] text-sm font-semibold tracking-wider">
+            <p className="text-[#850d0d] text-md font-semibold tracking-wider">
               ADMIN LOGIN
             </p>
           </div>
 
-          {currentView === 'login' ? (
-            /* Login Form */
-            <form onSubmit={handleLogin} className="space-y-6">
-              {/* Username */}
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-[#850d0d] font-bold text-base">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="User or Name"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
-                  required
-                />
-              </div>
+          {error && <p className="text-sm text-center text-red-600 font-semibold mb-4">{error}</p>}
+          {message && <p className="text-sm text-center text-green-700 font-semibold mb-4">{message}</p>}
 
-              {/* Password */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#850d0d] font-bold text-base">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
-                  required
-                />
-              </div>
-
-              {/* Login Button */}
-              <Button
-                type="submit"
-                className="w-full bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-8 transition-colors duration-200"
-              >
-                Login
-              </Button>
-
-              {/* Forgot Password Link */}
-              <div className="text-center mt-4">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('forgot')}
-                  className="text-[#850d0d] text-sm hover:underline font-medium"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-            </form>
-          ) : (
-            /* Forgot Password Form */
-            <form onSubmit={handleForgotPassword} className="space-y-6">
-              {/* Back to Login */}
-              <div className="mb-4">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('login')}
-                  className="text-[#850d0d] text-sm hover:underline font-medium"
-                >
-                  ← Back to Login
-                </button>
-              </div>
-
-              {/* Security Code */}
-              <div className="space-y-2">
-                <Label htmlFor="securityCode" className="text-[#850d0d] font-bold text-base">
-                  Security Code
-                </Label>
-                <Input
-                  id="securityCode"
-                  type="text"
-                  placeholder="User or Name"
-                  value={securityCode}
-                  onChange={(e) => setSecurityCode(e.target.value)}
-                  className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
-                  required
-                />
-              </div>
-
-              {/* New Password */}
-              <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-[#850d0d] font-bold text-base">
-                  New Password
-                </Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder="Password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
-                  required
-                />
-              </div>
-
-              {/* Confirm New Password */}
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-[#850d0d] font-bold text-base">
-                  New Password
-                </Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-transparent border border-[#850d0d] rounded-lg px-4 py-3 text-[#850d0d] placeholder:text-[#850d0d]/60 focus:ring-2 focus:ring-[#850d0d] focus:border-[#850d0d] font-medium"
-                  required
-                />
-              </div>
-
-              {/* Reset Password Button */}
-              <Button
-                type="submit"
-                className="w-full bg-[#850d0d] text-[#ffd600] hover:bg-[#6b0a0a] rounded-full py-4 text-lg font-bold mt-8 transition-colors duration-200"
-              >
-                Reset Password
-              </Button>
-            </form>
-          )}
+          {renderContent()}
         </div>
       </DialogContent>
     </Dialog>

@@ -4,63 +4,89 @@ import React, { useState } from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResearchForm, ResearchFormData } from '@/components/admin/ResearchForm';
 import { useRouter } from 'next/navigation';
-import { studies } from '@/app/data/studies';
-import { Study } from '@/app/types/study';
+import { supabase } from '@/lib/supabaseClient';
+import {v4 as uuidv4} from 'uuid';
 
 export default function AddResearchPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [uploadedCount, setUploadedCount] = useState(0);
+
+  React.useEffect(() => {
+    const fetchCount = async () => {
+      const { count, error } = await supabase
+        .from('studies') // Replace with your table name
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('Error fetching study count:', error);
+      } else {
+        setUploadedCount(count || 0);
+      }
+    };
+
+    fetchCount();
+  }, []);
+
   const handleSubmit = async (formData: ResearchFormData, file: File | null) => {
     setIsLoading(true);
     
     try {
-      // Format the date for display
+      let fileUrl: string | undefined = undefined;
+
+      // 1. Handle File Upload to Supabase Storage
+      if (file) {
+        const fileName = `${uuidv4()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`; // Create a unique file name
+        const { data: fileData, error: fileError } = await supabase.storage
+          .from('papers') // Your storage bucket name
+          .upload(fileName, file);
+
+        if (fileError) {
+          throw new Error(`File upload failed: ${fileError.message}`);
+        }
+        
+        // Get the public URL of the uploaded file
+        const { data: publicUrlData } = supabase.storage
+          .from('papers') // Your storage bucket name
+          .getPublicUrl(fileName);
+        
+        fileUrl = publicUrlData.publicUrl;
+      }
+
       const date = new Date(formData.date);
       const month = date.toLocaleString('default', { month: 'long' });
       const year = date.getFullYear();
       const formattedDate = `${month}, ${year}`;
 
-      // Create a new study object
-      const newStudy: Study = {
-        id: `study-${Object.keys(studies).length + 1}`, // Generate a new ID
+      const newStudy = {
+        // id is usually handled by Supabase (auto-increment or uuid)
         title: formData.title,
-        authors: formData.authors.split(',').map(author => author.trim()),
+        authors: formData.authors.map(author => author.trim()),
         year: date.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
-        abstract: formData.introduction, // Using introduction as abstract
-        datePublished: formattedDate,
-        pdfUrl: file ? `/papers/${file.name}` : undefined,
-        sections: {
-          introduction: formData.introduction,
-          methodology: formData.methodology,
-          results: formData.resultsAndDiscussion
-        }
+        abstract: formData.introduction, 
+        date_published: formattedDate,
+        pdf_url: fileUrl, // The URL from Supabase Storage
+        introduction: formData.introduction,
+        methodology: formData.methodology,
+        results_and_discussion: formData.resultsAndDiscussion,
+        // Ensure your Supabase columns match these keys
       };
 
-      // Create FormData for the API request
-      const apiFormData = new FormData();
-      apiFormData.append('studyData', JSON.stringify(newStudy));
-      if (file) {
-        apiFormData.append('file', file);
+      const { error: insertError } = await supabase
+        .from('studies') // Replace with your actual table name in Supabase
+        .insert([newStudy]);
+
+      if (insertError) {
+        throw new Error(`Database insert failed: ${insertError.message}`);
       }
 
-      // Send the request to our API
-      const response = await fetch('/api/research', {
-        method: 'POST',
-        body: apiFormData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit research');
-      }
-
-      // Show success message and redirect
       alert('Research added successfully!');
       router.push('/admin');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting research:', error);
-      alert('Error adding research. Please try again.');
+      alert(`Error adding research: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +97,7 @@ export default function AddResearchPage() {
       <div className="flex">
         {/* Sidebar */}
         <AdminSidebar 
-          uploadedCount={Object.keys(studies).length} 
+          uploadedCount={uploadedCount}
           onUploadClick={() => router.push('/admin/add')}
         />
         
@@ -81,12 +107,9 @@ export default function AddResearchPage() {
             {/* Header */}
             <div className="mb-8">        
               <div className="text-[#850d0d]">
-                <h1 className="text-xl font-semibold mb-2">
-                  Welcome to the research submission portal.
-                </h1>
-                <p className="text-[#850d0d]">
-                  Kindly upload your research materials using the provided interface.
-                </p>
+                <h1 className="text-xl font-normal mb-2">
+                  <span className="font-bold">Welcome to the research submission portal.</span> Kindly upload your research materials using the provided interface.
+                  </h1>
               </div>
             </div>
 

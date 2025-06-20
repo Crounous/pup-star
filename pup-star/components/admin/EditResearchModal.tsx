@@ -14,7 +14,7 @@ export function EditResearchModal({ study, onClose, onUpdate, isLoading }: EditR
   // Convert the study data to form data
   const initialFormData: ResearchFormData = {
     title: study.title,
-    authors: study.authors.join(', '),
+    authors: study.authors,
     date: new Date(study.year, 0, 1).toISOString().split('T')[0], // Convert year to date
     course: study.course === 'Computer Science' ? 'computer-science' : 'information-technology',
     introduction: study.sections?.introduction || study.abstract,
@@ -26,7 +26,7 @@ export function EditResearchModal({ study, onClose, onUpdate, isLoading }: EditR
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-[#ffd600] rounded-lg w-[90%] max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-[#ffd600] p-6 border-b border-[#850d0d]/20 flex justify-between items-center">
+        <div className="sticky top-0 z-20 bg-[#ffd600] p-6 border-b border-[#850d0d]/20 flex justify-between items-center">
           <div className="text-[#850d0d]">
             <h2 className="text-xl font-semibold mb-2">
               Edit Research
