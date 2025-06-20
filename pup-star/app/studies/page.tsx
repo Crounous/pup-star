@@ -258,7 +258,7 @@ export default function AllStudiesPage() {
             <div>
               <div className="text-lg font-bold mb-2">Year of Publication</div>
               <div className="mb-2">
-                <label className="block text-sm mb-1" htmlFor="year-from">From:</label>
+                <label className="block font-bold text-sm mb-1" htmlFor="year-from">From:</label>
                 <div className="relative">
                   <select
                     id="year-from"
@@ -277,7 +277,7 @@ export default function AllStudiesPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm mb-1" htmlFor="year-to">To:</label>
+                <label className="block font-bold text-sm mb-1" htmlFor="year-to">To:</label>
                 <div className="relative">
                   <select
                     id="year-to"
@@ -350,7 +350,7 @@ export default function AllStudiesPage() {
         </aside>
 
         {/* Studies List */}
-        <main className="flex-1 pl-8">
+        <main className="flex-1 pl-6">
   {filteredStudies.length === 0 ? (
     <div className="text-center py-12">
       <p className="text-xl font-semibold text-[#880d0d] mb-2">No studies found</p>
@@ -360,7 +360,7 @@ export default function AllStudiesPage() {
     <div className="space-y-8">
       {paginatedStudies.map((study) => (
         // The key is now on the outer container div
-        <div key={study.id} className="transition-all duration-200 hover:shadow-lg hover:bg-[#ffd600]/5 rounded-lg p-6 relative group">
+        <div key={study.id} className="transition-all duration-200 hover:shadow-lg hover:bg-[#ffd600]/5 rounded-lg p-2 relative group">
           <div className="flex justify-between items-start">
             <div>
               {/* This Link now only wraps the title */}
