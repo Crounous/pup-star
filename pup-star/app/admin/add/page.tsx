@@ -37,7 +37,7 @@ export default function AddResearchPage() {
 
       // 1. Handle File Upload to Supabase Storage
       if (file) {
-        const fileName = `${uuidv4()}-${file.name}`; // Create a unique file name
+        const fileName = `${uuidv4()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`; // Create a unique file name
         const { data: fileData, error: fileError } = await supabase.storage
           .from('papers') // Your storage bucket name
           .upload(fileName, file);
@@ -65,7 +65,7 @@ export default function AddResearchPage() {
         authors: formData.authors.map(author => author.trim()),
         year: date.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
-        abstract: formData.introduction, // Or formData.abstract if you have it
+        abstract: formData.introduction, 
         date_published: formattedDate,
         pdf_url: fileUrl, // The URL from Supabase Storage
         introduction: formData.introduction,
