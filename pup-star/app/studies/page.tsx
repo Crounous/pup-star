@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
-import { studies } from '../data/studies'
 import { Study } from '../types/study'
 
 const ITEMS_PER_PAGE = 4
@@ -21,15 +20,48 @@ export default function AllStudiesPage() {
     IT: false
   })
   const [currentPage, setCurrentPage] = useState(1)
+  const [studies, setStudies] = useState<Study[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const currentYear = new Date().getFullYear();
-  // Generate a list of years, for example, from the current year down to 1900
-  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
-  // Convert studies object to array
-  const allStudies: Study[] = Object.values(studies)
+  useEffect(() => {
+    const fetchStudies = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const res = await fetch('/api/research', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (!res.ok) {
+          throw new Error(`Failed to fetch studies: ${res.status} ${res.statusText}`)
+        }
+        
+        const data = await res.json()
+        setStudies(data)
+        console.log('Successfully fetched studies:', data.length)
+        
+      } catch (err: any) {
+        console.error("Error fetching studies:", err)
+        setError(err.message || 'Failed to load research data. Please try refreshing the page.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchStudies()
+  }, [])
+
+  const currentYear = new Date().getFullYear()
+  // Generate a list of years from current year down to 1900
+  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i)
 
   // Filter and sort studies based on current filters
-  const filteredStudies = allStudies.filter(study => {
+  const filteredStudies = studies.filter(study => {
     const matchesCourse = (
       (selectedCourses.CS && study.course === 'Computer Science') ||
       (selectedCourses.IT && study.course === 'Information Technology')
@@ -131,14 +163,60 @@ export default function AllStudiesPage() {
 
     return pageNumbers
   }
-  const YearFilter = () => {
-  const [yearFrom, setYearFrom] = useState('');
-  const [yearTo, setYearTo] = useState('');
 
-  // Get the current year
-  const currentYear = new Date().getFullYear();
-  // Generate a list of years, for example, from the current year down to 1900
-  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
+  // Function to truncate abstract with word boundary
+  const truncateAbstract = (abstract: string, maxLength: number = 300) => {
+    if (abstract.length <= maxLength) return abstract
+    
+    // Find the last space before the maxLength to avoid cutting words
+    const truncated = abstract.substring(0, maxLength)
+    const lastSpaceIndex = truncated.lastIndexOf(' ')
+    
+    return lastSpaceIndex > 0 
+      ? truncated.substring(0, lastSpaceIndex) + '...'
+      : truncated + '...'
+  }
+
+  // Function to render justified text with paragraph breaks
+  const renderJustifiedText = (text: string) => {
+    // Split text into paragraphs while preserving intentional line breaks
+    return text
+      .split('\n\n')  
+      .map(paragraph => paragraph.split('\n').join(' '))  
+      .filter(p => p.trim() !== '')  
+      .map((paragraph, index) => (
+        <p key={index} className="mb-4 text-justify">{paragraph}</p>
+      ));
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white font-montserrat text-[#880d0d] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#880d0d] mx-auto mb-4"></div>
+          <p className="text-xl font-semibold">Loading studies...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white font-montserrat text-[#880d0d] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl font-semibold mb-4">Error loading studies</p>
+          <p className="text-base text-[#880d0d]/70 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-[#880d0d] text-white px-6 py-2 rounded hover:bg-[#880d0d]/80 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
   }
   
   return (
@@ -273,42 +351,54 @@ export default function AllStudiesPage() {
 
         {/* Studies List */}
         <main className="flex-1 pl-8">
-          <div className="space-y-8">
-            {paginatedStudies.map((study) => (
-              <Link 
-                href={`/studies/${study.id}`} 
-                key={study.id} 
-                className="block group cursor-pointer"
-              >
-                <div className="transition-all duration-200 hover:shadow-lg hover:bg-[#ffd600]/5 rounded-lg p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-xl font-extrabold text-[#880d0d] mb-0.5 group-hover:text-[#880d0d]/80" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-                        {study.title}
-                        <span className="text-base font-semibold text-[#FFD600] ml-2 align-middle">| {study.course}, {study.year}</span>
+          {filteredStudies.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-xl font-semibold text-[#880d0d] mb-2">No studies found</p>
+              <p className="text-[#880d0d]/70">Try adjusting your search criteria or filters.</p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {paginatedStudies.map((study) => (
+                <Link 
+                  href={`/studies/${study.id}`} 
+                  key={study.id} 
+                  className="block group cursor-pointer"
+                >
+                  <div className="transition-all duration-200 hover:shadow-lg hover:bg-[#ffd600]/5 rounded-lg p-6">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="text-xl font-extrabold text-[#880d0d] mb-0.5 group-hover:text-[#880d0d]/80" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
+                          {study.title}
+                          <span className="text-base font-semibold text-[#FFD600] ml-2 align-middle">| {study.course}, {study.year}</span>
+                        </div>
+                        <div className="text-sm text-[#880d0d] font-semibold mb-1" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
+                          {study.authors.join(", ")} 
+                        </div>
                       </div>
-                      <div className="text-sm text-[#880d0d] font-semibold mb-1" style={{fontFamily: 'Montserrat, Arial, sans-serif'}}>
-                        {study.authors.join(", ")} 
-                      </div>
+                      {study.pdfUrl && (
+                        <a
+                          href={study.pdfUrl}
+                          download
+                          className="text-[#880d0d] font-bold text-base min-w-[60px] text-right select-none hover:text-[#FFD600] transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          [PDF]
+                        </a>
+                      )}
                     </div>
-                    {study.pdfUrl && (
-                      <a
-                        href={study.pdfUrl}
-                        download
-                        className="text-[#880d0d] font-bold text-base min-w-[60px] text-right select-none hover:text-[#FFD600] transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        [PDF]
-                      </a>
-                    )}
+                    <div className="relative pl-8 mt-1" style={{textIndent: '-2rem', marginLeft: '2rem'}}>
+                      <div className="text-[#880d0d] text-base leading-relaxed">
+                        {renderJustifiedText(truncateAbstract(study.abstract))}
+                      </div>
+                      {study.abstract.length > 300 && (
+                        <div className="absolute bottom-0 right-0 w-16 h-6 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none" />
+                      )}
+                    </div>
                   </div>
-                  <div className="text-[#880d0d] text-base pl-8 mt-1" style={{textIndent: '-2rem', marginLeft: '2rem'}}>
-                    {study.abstract}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -352,4 +442,4 @@ export default function AllStudiesPage() {
       </div>
     </div>
   )
-} 
+}

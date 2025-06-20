@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Environment check and client setup
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
-const USE_SUPABASE = !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Supabase environment variables SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
-}
-// Initialize Supabase client with timeout settings
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
+import { supabase } from '@/lib/supabaseClient';
 
 // Configuration
 const BUCKET_NAME = 'papers';
@@ -30,6 +18,109 @@ function logError(message: string, error?: any) {
 
 function logSuccess(message: string) {
   console.log(`✅ ${message}`);
+}
+
+// GET function to fetch all studies or a specific study by ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params?: { id?: string } } = {}
+) {
+  const studyId = params?.id;
+  
+  if (studyId) {
+    logInfo(`Received GET request for study ID: ${studyId}`);
+    
+    try {
+      logInfo('Fetching specific study from Supabase database...');
+      
+      const { data, error } = await supabase
+        .from('studies')
+        .select('*')
+        .eq('id', studyId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          logError(`Study not found: ${studyId}`);
+          return NextResponse.json(
+            { error: 'Study not found' },
+            { status: 404 }
+          );
+        }
+        logError('Supabase fetch failed', error);
+        throw error;
+      }
+
+      logSuccess(`Successfully fetched study: ${data.title}`);
+      
+      // Transform the data to match the expected format in the frontend
+      const transformedData = {
+        id: data.id,
+        title: data.title,
+        authors: data.authors,
+        year: data.year,
+        course: data.course,
+        abstract: data.abstract,
+        sections: data.sections,
+        datePublished: data.date_published,
+        pdfUrl: data.pdf_url,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+
+      return NextResponse.json(transformedData);
+      
+    } catch (error: any) {
+      logError(`Error fetching study ID: ${studyId}`, error);
+      return NextResponse.json(
+        { error: 'Failed to fetch study', details: error.message },
+        { status: 500 }
+      );
+    }
+  } else {
+    // Existing GET logic for all studies
+    logInfo('Received GET request for all studies');
+
+    try {
+      logInfo('Fetching studies from Supabase database...');
+      
+      const { data, error } = await supabase
+        .from('studies')
+        .select('*')
+        .order('created_at', { ascending: false }); // Order by creation date, newest first
+
+      if (error) {
+        logError('Supabase fetch failed', error);
+        throw error;
+      }
+
+      logSuccess(`Successfully fetched ${data?.length || 0} studies`);
+      
+      // Transform the data to match the expected format in the frontend
+      const transformedData = data?.map(study => ({
+        id: study.id,
+        title: study.title,
+        authors: study.authors,
+        year: study.year,
+        course: study.course,
+        abstract: study.abstract,
+        sections: study.sections,
+        datePublished: study.date_published,
+        pdfUrl: study.pdf_url,
+        createdAt: study.created_at,
+        updatedAt: study.updated_at
+      })) || [];
+
+      return NextResponse.json(transformedData);
+      
+    } catch (error: any) {
+      logError('Error fetching studies', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch studies', details: error.message },
+        { status: 500 }
+      );
+    }
+  }
 }
 
 async function uploadPdfToSupabase(file: File, studyId: string): Promise<string> {
@@ -115,5 +206,3 @@ export async function PUT(
     );
   }
 }
-
-
