@@ -447,6 +447,52 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+          {/* Pagination */}
+          <div className="absolute bottom-0 right-0 w-3/4 bg-[#ffd600] p-4">
+              {totalPages > 1 && (
+                  <div className="flex items-center justify-center space-x-2">
+                      <Button
+                          variant="ghost"
+                          className="text-[#850d0d] hover:bg-[#850d0d]/10"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                      >
+                          <ChevronLeft className="w-4 h-4 mr-1" />
+                          Previous
+                      </Button>
+                      
+                      {getPageNumbers().map((pageNum, index) => (
+                          pageNum === '...' ? (
+                              <span key={`ellipsis-${index}`} className="text-[#850d0d]">...</span>
+                          ) : (
+                              <Button
+                                  key={pageNum}
+                                  onClick={() => handlePageChange(pageNum as number)}
+                                  className={`w-8 h-8 rounded ${
+                                      currentPage === pageNum
+                                          ? 'bg-[#850d0d] text-[#ffd600] hover:bg-[#850d0d] hover:text-[#ffd600]'
+                                          : 'text-[#850d0d] bg-transparent shadow-none hover:bg-[#850d0d]/10'
+                                  }`}
+                              >
+                                  {pageNum}
+                              </Button>
+                          )
+                      ))}
+
+                      <Button
+                          variant="ghost"
+                          className="text-[#850d0d] hover:bg-[#850d0d]/10"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                      >
+                          Next
+                          <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                  </div>
+              )}
+          </div>
+        </div>
+      </div>
 
           <ResearchDeletionPopup
             open={deletionPopupOpen}
@@ -458,50 +504,6 @@ export default function AdminPage() {
             isDeleting={isDeleting}
           />
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center mt-8 space-x-2">
-              <Button
-                variant="ghost"
-                className="text-[#850d0d] hover:bg-[#850d0d]/10"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </Button>
-              
-              {getPageNumbers().map((pageNum, index) => (
-                pageNum === '...' ? (
-                  <span key={`ellipsis-${index}`} className="text-[#850d0d]">...</span>
-                ) : (
-                  <Button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum as number)}
-                    className={`w-8 h-8 rounded ${
-                      currentPage === pageNum
-                        ? 'bg-[#850d0d] text-[#ffd600] hover:bg-[#850d0d] hover:text-[#ffd600]'
-                        : 'text-[#850d0d] bg-transparent shadow-none hover:bg-[#850d0d]/10'
-                    }`}
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              ))}
-
-              <Button
-                variant="ghost"
-                className="text-[#850d0d] hover:bg-[#850d0d]/10"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Edit Modal */}
       {editingStudy && (
