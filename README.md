@@ -1,24 +1,78 @@
-# PUP-STAR
+<div align="center">
+  <img src="assets/star.png" alt="Star" width="120" height="120" />
+  
+  <h1 style="color:#850d0d; font-family:sans-serif; font-size:2.5rem; margin: 0.5em 0;">PUP-STAR</h1>
+  
+  <!-- Badges -->
+  <p>
+    <a href="https://nextjs.org/" target="_blank"><img src="https://img.shields.io/badge/Next.js-000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js Badge" /></a>
+    <a href="https://supabase.com/" target="_blank"><img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase Badge" /></a>
+    <a href="https://tailwindcss.com/" target="_blank"><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS Badge" /></a>
+    <a href="https://ui.shadcn.com/" target="_blank"><img src="https://img.shields.io/badge/shadcn/ui-111827?style=for-the-badge" alt="shadcn/ui Badge" /></a>
+    <a href="https://bun.sh/" target="_blank"><img src="https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white" alt="Bun Badge" /></a>
+  </p>
+  <p style="color:#222; font-family:sans-serif; font-size:1.1rem; margin-top:1.5em; max-width:600px;">
+    This website application is a final project for the requirement of the subject Web Development.
+  </p>
+</div>
 
-This website application is a final project for the requirement of the subject Web Development.
+## Table of Contents
 
-**Members:**  
+- [Table of Contents](#table-of-contents)
+- [Members 👩‍💻👨‍💻](#members-)
+- [Project Description](#project-description)
+- [How to Run locally](#how-to-run-locally)
+  - [Supabase Setup](#supabase-setup)
+    - [1. Create a Supabase Project](#1-create-a-supabase-project)
+    - [2. Setting the Supabase Keys](#2-setting-the-supabase-keys)
+    - [3. Setting up the Database Table](#3-setting-up-the-database-table)
+    - [4. Creating a Storage Bucket Named `papers`](#4-creating-a-storage-bucket-named-papers)
+    - [5. Running the `migrate.ts`](#5-running-the-migratets)
+    - [Troubleshooting](#troubleshooting)
+
+## Members 👩‍💻👨‍💻
+
 Alano, Ruzel Luigi  
 Hinay, Anthony John C.  
 Llesis, Earl Gem  
 Quijano, Katherine  
 Rolle, Xavier B.
 
+## Project Description
+
 PUP-STAR is an online platform designed to serve as a centralized digital repository for past theses and research papers from the Polytechnic University of the Philippines (PUP). The platform aims to provide future researchers with easy access to scholarly articles of previous generations, enabling knowledge sharing, citation assistance, and intellectual growth within the university.
 
 ***
 
-## How to Run
+## How to Run locally
+
+This project uses [Bun](https://bun.sh/) as its JavaScript runtime and package manager.
+
+To install Bun:
+- **macOS / Linux**:
+  ```sh
+  curl -fsSL https://bun.sh/install | bash
+  ```
+- **Windows** (with [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)):
+  ```sh
+  winget install Oven.Bun
+  ```
+- For more installation options, see the [official Bun installation guide](https://bun.sh/docs/installation).
+
+Once finished, navigate to the `pup-star` directory and install dependencies:
+
+```sh
+cd pup-star
+bun i
+```
+
+To run the development server:
+
+```sh
+bun dev
+```
 
 ### Supabase Setup
-
-> **Note:**  
-> Currently, only `migrate.ts` is working. Both `route.ts` files have errors.
 
 #### 1. Create a Supabase Project
 
@@ -28,12 +82,12 @@ PUP-STAR is an online platform designed to serve as a centralized digital reposi
 
 #### 2. Setting the Supabase Keys
 
-To run this project, you must set up the `.env` variables. Please check `.env.example` for the format.
+To run this project, you must set up the `.env.local` variables. Please check `.env.example` for the format.
 
 ```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_SUPABASE_KEY=your-anon-key
+NEXT_SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
 **How to get these keys:**
@@ -126,7 +180,7 @@ bun run migrate.ts
 
 ---
 
-## Troubleshooting
+#### Troubleshooting
 
 - Ensure your `.env` file is correctly set up and not committed to version control.
 - If you encounter errors with `route.ts`, check the error logs and Supabase permissions.
