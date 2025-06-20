@@ -6,6 +6,7 @@ import { ResearchForm, ResearchFormData } from '@/components/admin/ResearchForm'
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import {v4 as uuidv4} from 'uuid';
+import ProtectedRoute from '@/components/login/ProtectedRoute';
 
 export default function AddResearchPage() {
   const router = useRouter();
@@ -90,6 +91,7 @@ export default function AddResearchPage() {
   };
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gradient-to-r from-[#850d0d] to-[#ffd600] font-montserrat">
       <div className="flex">
         {/* Sidebar */}
@@ -120,5 +122,6 @@ export default function AddResearchPage() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
