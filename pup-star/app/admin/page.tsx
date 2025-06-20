@@ -16,7 +16,7 @@ import { ResearchFormData } from '@/components/admin/ResearchForm';
 import { Study } from '../types/study';
 import { supabase } from '@/lib/supabaseClient';
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 5;
 
 export default function AdminPage() {
   const router = useRouter();

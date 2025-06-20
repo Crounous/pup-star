@@ -54,19 +54,16 @@ export default function AddResearchPage() {
         fileUrl = publicUrlData.publicUrl;
       }
 
-      const date = new Date(formData.date);
-      const month = date.toLocaleString('default', { month: 'long' });
-      const year = date.getFullYear();
-      const formattedDate = `${month}, ${year}`;
+      const dateObject = new Date(formData.date);;
 
       const newStudy = {
         // id is usually handled by Supabase (auto-increment or uuid)
         title: formData.title,
         authors: formData.authors.map(author => author.trim()),
-        year: date.getFullYear(),
+        year: dateObject.getFullYear(),
         course: formData.course === 'computer-science' ? 'Computer Science' : 'Information Technology',
         abstract: formData.introduction, 
-        date_published: formattedDate,
+        date_published: dateObject.toISOString(), // Ensure date is in ISO format
         pdf_url: fileUrl, // The URL from Supabase Storage
         introduction: formData.introduction,
         methodology: formData.methodology,
