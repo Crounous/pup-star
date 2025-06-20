@@ -131,5 +131,3 @@ bun run migrate.ts
 - Ensure your `.env` file is correctly set up and not committed to version control.
 - If you encounter errors with `route.ts`, check the error logs and Supabase permissions.
 - Make sure the `papers` storage bucket exists and has the correct permissions.
-
----
