@@ -193,7 +193,7 @@ export default function StudyDetailPage() {
           <main className="flex-1 max-w-4xl">
             <div className="mb-8">
               <div className="items-start">
-                <h1 className="text-3xl font-bold leading-8 mb-1 text-justify">{study.title || 'Untitled Study'}</h1>
+                <h1 className="text-3xl font-bold leading-8 mt-5 mb-1">{study.title || 'Untitled Study'}</h1>
               </div>
               <div className="text-right">
                 {study.pdfUrl && (
